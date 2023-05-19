@@ -1,0 +1,11 @@
+{
+  "name": "caching-prompt",
+  "version": "1.0.0",
+  "description": "Tool for prompt caching. It will store your prompt template as well as parameters in local cache and use it next time you send the same request.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
