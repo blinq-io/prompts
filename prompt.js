@@ -1,27 +1,81 @@
+const { OpenAIApi } = require("openai");
 const fs = require("fs");
-const equalsCheck = (a, b) => {
-    return JSON.stringify(a) === JSON.stringify(b);
+const md5 = require("md5");
+
+exports.PromptCompletion = class PromptCompletion {
+  openai;
+  cache;
+  path;
+
+  constructor(configuration) {
+    this.openai = new OpenAIApi(configuration);
+
+    this.cache = {};
+    this.path = "./cachingData.json";
   }
 
-const addToFile = async data => {
-    // fs.writeFileSync("/home/webiwork-36/projects/ai-qa/electron-app/src/automation/tasks/openai/caching.json", result, "utf-8");
-    let fileContents = await fs.readFileSync(`${__dirname}/cachingData.json`,'utf8');
-    fileContents = JSON.parse(fileContents);
-    fileContents.push(data);
-    await fs.writeFileSync(`${__dirname}/cachingData.json`, JSON.stringify(fileContents, null, 2), "utf-8");
-  };
-  
-const checkRequest = async(request)=>{
-    let cachingResponse = "";
-    console.log(`${__dirname}/caching.json`,"__dirname");
-    let fileContents = await fs.readFileSync(`${__dirname}/cachingData.json`,'utf8');
-    fileContents = JSON.parse(fileContents);
-    fileContents?.map((dt)=>{
-       let flagCheck =  equalsCheck(dt.request,request);
-       if(flagCheck){
-        cachingResponse = dt.response;
-       }
-    })
-    return cachingResponse;
+  _initCache() {
+    if (!fs.existsSync(this.path)) {
+      throw new Error("The path to the cache isn't correct");
+    }
+
+    this.cache = JSON.parse(fs.readFileSync(this.path));
   }
-  module.exports =  {checkRequest , addToFile }
+
+  _getCachePrompt(data) {
+    if (Object.keys(this.cache) == 0) {
+      this._initCache();
+    }
+
+    const hash = md5(JSON.stringify(data));
+    if (!this.cache[hash]) {
+      return { hashedCache: null, hash };
+    }
+
+    return { hashedCache: this.cache[hash], hash };
+  }
+
+  _setCachePrompt(data, response) {
+    const { hash } = this._getCachePrompt(data);
+    this.cache[hash] = response;
+
+    fs.writeFileSync(this.path, JSON.stringify(this.cache));
+  }
+
+  async createChatCompletion(props) {
+    if (process.env.NODE_ENV === "dev") {
+      const { hashedCache } = this._getCachePrompt(props.messages);
+
+      if (hashedCache !== null) {
+        return hashedCache;
+      }
+      const res = await this.openai.createChatCompletion(...props);
+
+      this._setCachePrompt(props.messages, res);
+
+      return res;
+    }
+
+    const res = await this.openai.createChatCompletion(...props);
+    return res;
+  }
+
+  async createCompletion(props) {
+    if (process.env.NODE_ENV === "dev") {
+      const { hashedCache } = this._getCachePrompt(props.messages);
+
+      if (hashedCache !== null) {
+        return hashedCache;
+      }
+
+      const res = await this.openai.createCompletion(...props);
+
+      this._setCachePrompt(props.messages, res);
+
+      return res;
+    }
+
+    const res = await this.openai.createCompletion(...props);
+    return res;
+  }
+};
