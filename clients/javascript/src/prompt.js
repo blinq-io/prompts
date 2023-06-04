@@ -49,14 +49,14 @@ exports.PromptCompletion = class PromptCompletion {
       if (hashedCache !== null) {
         return hashedCache;
       }
-      const res = await this.openai.createChatCompletion(...props);
+      const res = await this.openai.createChatCompletion({ ...props });
 
       this._setCachePrompt(props.messages, res);
 
       return res;
     }
 
-    const res = await this.openai.createChatCompletion(...props);
+    const res = await this.openai.createChatCompletion({ ...props });
     return res;
   }
 
@@ -67,15 +67,14 @@ exports.PromptCompletion = class PromptCompletion {
       if (hashedCache !== null) {
         return hashedCache;
       }
-
-      const res = await this.openai.createCompletion(...props);
+      const res = await this.openai.createCompletion({ ...props });
 
       this._setCachePrompt(props.messages, res);
 
       return res;
     }
 
-    const res = await this.openai.createCompletion(...props);
+    const res = await this.openai.createCompletion({ ...props });
     return res;
   }
 };
