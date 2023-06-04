@@ -5,10 +5,10 @@ name: Javascript client CI
 
 on:
   push:
-    paths: ["clients/javascript/**"]
+    paths: clients/javascript/**
     branches: ["main"]
   pull_request:
-    paths: ["clients/javascript/**"]
+    paths: clients/javascript/**
     branches: ["main"]
 
 jobs:
