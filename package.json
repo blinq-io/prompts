@@ -1,13 +1,29 @@
 {
-  "name": "caching-prompt",
+  "name": "prompt-eng",
   "version": "1.0.0",
   "description": "Tool for prompt caching. It will store your prompt template as well as parameters in local cache and use it next time you send the same request.",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha --file './test/cacheTest.js' ",
-    "test:dev": "cross-env NODE_ENV=dev mocha --file './test/cacheTest.js'"
+  "main": "bin/prompt.js",
+  "homepage": "https://github.com/blinq-io/prompts",
+  "bugs": {
+    "url": "https://github.com/blinq-io/prompts/issues"
   },
-  "author": "",
+  "keywords": [
+    "cache",
+    "test",
+    "prompt-engineering",
+    "automation",
+    "dev",
+    "production",
+    "openai"
+  ],
+  "scripts": {
+    "pack": "mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
+    "clean": "rm -rf ./build",
+    "build": "npm run clean && npm run pack",
+    "test": "mocha --file './src/test/cacheTest.js' ",
+    "test:dev": "cross-env NODE_ENV=dev mocha --file './src/test/cacheTest.js'"
+  },
+  "author": "blinq.io",
   "license": "ISC",
   "dependencies": {
     "cross-env": "^7.0.3",

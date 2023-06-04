@@ -15,7 +15,7 @@ describe("cache checking", () => {
   });
   it("save to cache", async () => {
     const prompt = new PromptCompletion(confAI);
-    prompt._setCachePrompt("data4\5", "response");
+    prompt._setCachePrompt("data4\57", "response");
   });
 
   it("saves on dev", async () => {
