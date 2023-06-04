@@ -1,4 +1,4 @@
-const { PromptCompletion } = require("../prompt");
+const { PromptCompletion } = require("../src/prompt");
 const { Configuration } = require("openai");
 const fs = require("fs");
 const { expect } = require("chai");
