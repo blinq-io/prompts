@@ -23,11 +23,18 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   _getCachePrompt(data) {
+    let hash;
+
     if (Object.keys(this.cache) == 0) {
       this._initCache();
     }
 
-    const hash = md5(JSON.stringify(data));
+    if (typeof data === "object") {
+      hash = md5(JSON.stringify(data));
+    } else {
+      hash = md5(data);
+    }
+
     if (!this.cache[hash]) {
       return { hashedCache: null, hash };
     }
