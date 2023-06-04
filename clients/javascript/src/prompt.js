@@ -7,11 +7,11 @@ exports.PromptCompletion = class PromptCompletion {
   cache;
   path;
 
-  constructor(configuration) {
+  constructor(configuration, path) {
     this.openai = new OpenAIApi(configuration);
 
     this.cache = {};
-    this.path = "./cachingData.json";
+    this.path = path;
   }
 
   _initCache() {
