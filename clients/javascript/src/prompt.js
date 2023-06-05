@@ -42,22 +42,36 @@ exports.PromptCompletion = class PromptCompletion {
     fs.writeFileSync(this.path, JSON.stringify(this.cache));
   }
 
-  _replacePromptParameters(data, parameters) {
-    if (!parameters) {
-      return data;
-    }
+  _replacePromptParameters(data, parameters, chat) {
+    if (!parameters) return data;
 
     for (const key in parameters) {
       const value = parameters[key];
       data = data.replaceAll(`{${key}}`, value);
     }
-    return data;
+
+    if (!chat) return data;
+
+    const messages = [];
+    const parts = promptFileContent.split("####");
+    for (let i = 0; i < parts.length; i++) {
+      if (!parts[i].trim()) continue;
+      const role = parts[i];
+      const prompt = parts[i + 1];
+      messages.push({ role, content: prompt.trim() });
+      //    console.error("####prompt####", `role ${role}ֿֿ`);
+      //    console.error(prompt.trim());
+      i++;
+    }
+
+    return messages;
   }
 
   async createChatCompletion(props) {
     props.messages = this._replacePromptParameters(
       props.messages,
-      props.parameters
+      props.parameters,
+      true
     );
     delete props.parameters;
 
@@ -81,7 +95,8 @@ exports.PromptCompletion = class PromptCompletion {
   async createCompletion(props) {
     props.prompt = this._replacePromptParameters(
       props.prompt,
-      props.parameters
+      props.parameters,
+      false
     );
     delete props.parameters;
     console.log(props.prompt);
