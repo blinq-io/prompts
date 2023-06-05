@@ -23,18 +23,11 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   _getCachePrompt(data) {
-    let hash;
-
     if (Object.keys(this.cache) == 0) {
       this._initCache();
     }
 
-    if (typeof data === "object") {
-      hash = md5(JSON.stringify(data));
-    } else {
-      hash = md5(data);
-    }
-
+    const hash = md5(JSON.stringify(data));
     if (!this.cache[hash]) {
       return { hashedCache: null, hash };
     }
@@ -69,14 +62,14 @@ exports.PromptCompletion = class PromptCompletion {
 
   async createCompletion(props) {
     if (process.env.NODE_ENV === "dev") {
-      const { hashedCache } = this._getCachePrompt(props.messages);
+      const { hashedCache } = this._getCachePrompt(props.prompt);
 
       if (hashedCache !== null) {
         return hashedCache;
       }
       const res = await this.openai.createCompletion({ ...props });
 
-      this._setCachePrompt(props.messages, res);
+      this._setCachePrompt(props.prompt, res);
 
       return res;
     }
