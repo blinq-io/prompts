@@ -1,13 +1,31 @@
 {
-  "name": "javascript",
+  "name": "prompt-eng-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A server that saves the cached data from the local prompt-eng cache to a database.",
+  "main": "bin/prompt.js",
+  "homepage": "https://github.com/blinq-io/prompts",
+  "bugs": {
+    "url": "https://github.com/blinq-io/prompts/issues"
+  },
+  "keywords": [
+    "cache",
+    "test",
+    "prompt-engineering",
+    "automation",
+    "dev",
+    "production",
+    "openai",
+    "server"
+  ],
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon ./src/app.js",
+    "pack": "mkdir build && mkdir build/bin && cp ./src/app.js ./build/bin/app.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
+    "clean": "rm -rf ./build",
+    "build": "npm run clean && npm run pack"
   },
   "jest": {
     "testEnvironment": "node",
@@ -15,7 +33,6 @@
       "./src/test/setup.js"
     ]
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
