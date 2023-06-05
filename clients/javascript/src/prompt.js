@@ -53,11 +53,11 @@ exports.PromptCompletion = class PromptCompletion {
 
       this._setCachePrompt(props.messages, res);
 
-      return res;
+      return res.choices[0];
     }
 
     const res = await this.openai.createChatCompletion({ ...props });
-    return res;
+    return res.choices[0];
   }
 
   async createCompletion(props) {
@@ -71,10 +71,10 @@ exports.PromptCompletion = class PromptCompletion {
 
       this._setCachePrompt(props.prompt, res);
 
-      return res;
+      return res.choices;
     }
 
     const res = await this.openai.createCompletion({ ...props });
-    return res;
+    return res.choices;
   }
 };
