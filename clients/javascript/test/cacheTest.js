@@ -5,7 +5,7 @@ const { expect } = require("chai");
 
 //const config = JSON.parse(fs.readFileSync("./config.json", "utf8"));
 const confAI = new Configuration({
-  apiKey: "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",
+  apiKey: "",
 });
 describe("cache checking", () => {
   it("check if config runs", () => {
