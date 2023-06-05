@@ -43,11 +43,11 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   _replacePromptParameters(data, parameters, chat) {
-    if (!parameters) return data;
-
-    for (const key in parameters) {
-      const value = parameters[key];
-      data = data.replaceAll(`{${key}}`, value);
+    if (parameters !== undefined) {
+      for (const key in parameters) {
+        const value = parameters[key];
+        data = data.replaceAll(`{${key}}`, value);
+      }
     }
 
     if (!chat) return data;
@@ -59,8 +59,6 @@ exports.PromptCompletion = class PromptCompletion {
       const role = parts[i];
       const prompt = parts[i + 1];
       messages.push({ role, content: prompt.trim() });
-      //    console.error("####prompt####", `role ${role}ֿֿ`);
-      //    console.error(prompt.trim());
       i++;
     }
 
