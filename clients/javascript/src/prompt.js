@@ -71,10 +71,10 @@ exports.PromptCompletion = class PromptCompletion {
 
       this._setCachePrompt(props.prompt, res);
 
-      return res.choices;
+      return res.choices[0];
     }
 
     const res = await this.openai.createCompletion({ ...props });
-    return res.choices;
+    return res.choices[0];
   }
 };
