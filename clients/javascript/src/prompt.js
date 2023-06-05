@@ -42,7 +42,25 @@ exports.PromptCompletion = class PromptCompletion {
     fs.writeFileSync(this.path, JSON.stringify(this.cache));
   }
 
+  _replacePromptParameters(data, parameters) {
+    if (!parameters) {
+      return data;
+    }
+
+    for (const key in parameters) {
+      const value = parameters[key];
+      data = data.replaceAll(`{${key}}`, value);
+    }
+    return data;
+  }
+
   async createChatCompletion(props) {
+    props.messages = this._replacePromptParameters(
+      props.messages,
+      props.parameters
+    );
+    delete props.parameters;
+
     if (process.env.NODE_ENV === "dev") {
       const { hashedCache } = this._getCachePrompt(props.messages);
 
@@ -61,6 +79,12 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createCompletion(props) {
+    props.prompt = this._replacePromptParameters(
+      props.prompt,
+      props.parameters
+    );
+    delete props.parameters;
+    console.log(props.prompt);
     if (process.env.NODE_ENV === "dev") {
       const { hashedCache } = this._getCachePrompt(props.prompt);
 
