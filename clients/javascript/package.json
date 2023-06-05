@@ -20,8 +20,8 @@
     "pack": "mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
     "clean": "rm -rf ./build",
     "build": "npm run clean && npm run pack",
-    "test": "mocha --file './src/test/cacheTest.js' ",
-    "test:dev": "cross-env NODE_ENV=dev mocha --file './src/test/cacheTest.js'"
+    "test": "mocha --file './test/cacheTest.js' ",
+    "test:dev": "cross-env NODE_ENV=dev mocha --file './test/cacheTest.js'"
   },
   "author": "blinq.io",
   "license": "ISC",
