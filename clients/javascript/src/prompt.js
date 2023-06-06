@@ -10,6 +10,7 @@ exports.PromptCompletion = class PromptCompletion {
   cache;
   path;
   serverURI;
+  static isInterval = false;
   static queue = new Queue();
 
   constructor(configuration, path, serverURI) {
@@ -21,8 +22,11 @@ exports.PromptCompletion = class PromptCompletion {
       : process.env.PROMPT_SRV_URI
       ? process.env.PROMPT_SRV_URI
       : "http://localhost:3000";
+  }
 
-    if (!PromptCompletion.queue.isEmpty) {
+  _initInterval() {
+    if (!PromptCompletion.isInterval) {
+      PromptCompletion.isInterval = true;
       setInterval(async () => {
         try {
           console.log(`${PromptCompletion.queue.length}`);
@@ -95,6 +99,7 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createChatCompletion(props) {
+    _initInterval();
     let propsPos = { ...props, prompt: props.messages };
 
     props.messages = this._replacePromptParameters(
@@ -129,6 +134,7 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createCompletion(props) {
+    _initInterval();
     let propsPos = { ...props };
 
     props.prompt = this._replacePromptParameters(
