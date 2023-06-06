@@ -99,7 +99,7 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createChatCompletion(props) {
-    _initInterval();
+    this._initInterval();
     let propsPos = { ...props, prompt: props.messages };
 
     props.messages = this._replacePromptParameters(
@@ -134,7 +134,7 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createCompletion(props) {
-    _initInterval();
+    this._initInterval();
     let propsPos = { ...props };
 
     props.prompt = this._replacePromptParameters(
