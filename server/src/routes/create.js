@@ -8,6 +8,9 @@ router.post("/api/createPrompt", async (req, res) => {
   const isExist = await Prompt.findOne({ hash });
 
   if (isExist) {
+    console.log(
+      "A prompt with this hash already exists, try updating instead!"
+    );
     return res.send(
       "A prompt with this hash already exists, try updating instead!"
     );

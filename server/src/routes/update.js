@@ -9,6 +9,7 @@ router.put("/api/updatePrompt", async (req, res) => {
   const prompt = await Prompt.findOne({ hash });
 
   if (!prompt) {
+    console.log("No prompt with that hash exists!");
     return res.send("No prompt with that hash exists!");
   }
 
