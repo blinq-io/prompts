@@ -22,18 +22,18 @@ exports.PromptCompletion = class PromptCompletion {
       ? process.env.PROMPT_SRV_URI
       : "http://localhost:3000";
 
-    if (!this.queue.isEmpty()) {
+    if (!PromptCompletion.queue.isEmpty) {
       setInterval(async () => {
         try {
-          if (!queue.isEmpty()) {
+          if (!queue.isEmpty) {
             await axios.post(`${this.serverURI}/api/createPrompt`, {
               ...queue.dequeue(),
             });
           }
         } catch (error) {
-          if (this.queue.length() >= 100) {
-            while (this.queue >= 100) {
-              this.queue.dequeue();
+          if (PromptCompletion.queue.length() >= 100) {
+            while (PromptCompletion.queue >= 100) {
+              PromptCompletion.queue.dequeue();
             }
           }
           throw error;
@@ -114,7 +114,7 @@ exports.PromptCompletion = class PromptCompletion {
       this._setCachePrompt(props.messages, res.data.choices[0]);
 
       propsPos = { ...propsPos, response: res.data.choices[0], hash };
-      this.queue.enqueue({ ...propsPos });
+      PromptCompletion.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
@@ -123,7 +123,7 @@ exports.PromptCompletion = class PromptCompletion {
     const hash = md5(JSON.stringify(props.messages));
 
     propsPos = { ...propsPos, response: res.data.choices[0], hash };
-    this.queue.enqueue({ ...propsPos });
+    PromptCompletion.queue.enqueue({ ...propsPos });
     return res.data.choices[0];
   }
 
@@ -148,7 +148,7 @@ exports.PromptCompletion = class PromptCompletion {
       this._setCachePrompt(props.prompt, res.data.choices[0]);
 
       propsPos = { ...propsPos, response: res.data.choices[0], hash };
-      this.queue.enqueue({ ...propsPos });
+      PromptCompletion.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
@@ -156,7 +156,7 @@ exports.PromptCompletion = class PromptCompletion {
 
     const hash = md5(JSON.stringify(props.prompt));
     propsPos = { ...propsPos, response: res.data.choices[0], hash };
-    this.queue.enqueue({ ...propsPos });
+    PromptCompletion.queue.enqueue({ ...propsPos });
     return res.data.choices[0];
   }
 };
