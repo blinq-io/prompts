@@ -1,6 +1,6 @@
 {
   "name": "prompt-eng",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Tool for prompt caching openai gpt responses. It will store your prompt template as well as parameters in local cache and use it next time you send the same request.",
   "main": "bin/prompt.js",
   "homepage": "https://github.com/blinq-io/prompts",
@@ -17,7 +17,7 @@
     "openai"
   ],
   "scripts": {
-    "pack": "mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./src/queue.js ./build/bin/queue.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
+    "pack": "npm version patch && mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./src/queue.js ./build/bin/queue.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
     "clean": "rm -rf ./build",
     "build": "npm run clean && npm run pack",
     "test": "mocha --file './test/cacheTest.js' ",
