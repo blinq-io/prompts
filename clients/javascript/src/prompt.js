@@ -29,9 +29,7 @@ exports.PromptCompletion = class PromptCompletion {
       PromptCompletion.isInterval = true;
       setInterval(async () => {
         try {
-          console.log(`${PromptCompletion.queue.length}`);
           if (!PromptCompletion.queue.isEmpty) {
-            console.log(PromptCompletion.queue.head());
             await axios.post(`${this.serverURI}/api/createPrompt`, {
               ...PromptCompletion.queue.dequeue(),
             });
@@ -131,6 +129,7 @@ exports.PromptCompletion = class PromptCompletion {
 
     propsPos = { ...propsPos, response: res.data.choices[0], hash };
     PromptCompletion.queue.enqueue({ ...propsPos });
+
     return res.data.choices[0];
   }
 
@@ -144,7 +143,6 @@ exports.PromptCompletion = class PromptCompletion {
       false
     );
     delete props.parameters;
-    console.log(props.prompt);
     if (process.env.NODE_ENV === "dev") {
       const { hashedCache, hash } = this._getCachePrompt(props.prompt);
 
