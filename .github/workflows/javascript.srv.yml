@@ -22,12 +22,12 @@ jobs:
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
       - run: npm install
-        working-directory: ${{ github.workspace }}/server/javascript
+        working-directory: ${{ github.workspace }}/server
       - run: npm run build
-        working-directory: ${{ github.workspace }}/server/javascript
+        working-directory: ${{ github.workspace }}/server
       - name: publish server to npm
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_PASSWORD }}
-          package: ${{ github.workspace }}/server/javascript/build/package.json
+          package: ${{ github.workspace }}/server/build/package.json
           check-version: true

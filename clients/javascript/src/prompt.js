@@ -1,17 +1,45 @@
+require("dotenv").config();
 const { OpenAIApi } = require("openai");
 const fs = require("fs");
 const md5 = require("md5");
+const { Queue } = require("./queue");
+const axios = require("axios");
 
 exports.PromptCompletion = class PromptCompletion {
   openai;
   cache;
   path;
+  serverURI;
+  static queue = new Queue();
 
-  constructor(configuration, path) {
+  constructor(configuration, path, serverURI) {
     this.openai = new OpenAIApi(configuration);
-
     this.cache = {};
     this.path = path;
+    this.serverURI = serverURI
+      ? serverURI
+      : process.env.PROMPT_SRV_URI
+      ? process.env.PROMPT_SRV_URI
+      : "http://localhost:3000";
+
+    if (!this.queue.isEmpty()) {
+      setInterval(async () => {
+        try {
+          if (!queue.isEmpty()) {
+            await axios.post(`${this.serverURI}/api/createPrompt`, {
+              ...queue.dequeue(),
+            });
+          }
+        } catch (error) {
+          if (this.queue.length() >= 100) {
+            while (this.queue >= 100) {
+              this.queue.dequeue();
+            }
+          }
+          throw error;
+        }
+      }, 2000);
+    }
   }
 
   _initCache() {
@@ -66,6 +94,8 @@ exports.PromptCompletion = class PromptCompletion {
   }
 
   async createChatCompletion(props) {
+    let propsPos = { ...props, prompt: props.messages };
+
     props.messages = this._replacePromptParameters(
       props.messages,
       props.parameters,
@@ -74,7 +104,7 @@ exports.PromptCompletion = class PromptCompletion {
     delete props.parameters;
 
     if (process.env.NODE_ENV === "dev") {
-      const { hashedCache } = this._getCachePrompt(props.messages);
+      const { hashedCache, hash } = this._getCachePrompt(props.messages);
 
       if (hashedCache !== null) {
         return hashedCache;
@@ -83,14 +113,23 @@ exports.PromptCompletion = class PromptCompletion {
 
       this._setCachePrompt(props.messages, res.data.choices[0]);
 
+      propsPos = { ...propsPos, response: res.data.choices[0], hash };
+      this.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
     const res = await this.openai.createChatCompletion({ ...props });
+
+    const hash = md5(JSON.stringify(props.messages));
+
+    propsPos = { ...propsPos, response: res.data.choices[0], hash };
+    this.queue.enqueue({ ...propsPos });
     return res.data.choices[0];
   }
 
   async createCompletion(props) {
+    let propsPos = { ...props };
+
     props.prompt = this._replacePromptParameters(
       props.prompt,
       props.parameters,
@@ -99,7 +138,7 @@ exports.PromptCompletion = class PromptCompletion {
     delete props.parameters;
     console.log(props.prompt);
     if (process.env.NODE_ENV === "dev") {
-      const { hashedCache } = this._getCachePrompt(props.prompt);
+      const { hashedCache, hash } = this._getCachePrompt(props.prompt);
 
       if (hashedCache !== null) {
         return hashedCache;
@@ -108,10 +147,16 @@ exports.PromptCompletion = class PromptCompletion {
 
       this._setCachePrompt(props.prompt, res.data.choices[0]);
 
+      propsPos = { ...propsPos, response: res.data.choices[0], hash };
+      this.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
     const res = await this.openai.createCompletion({ ...props });
+
+    const hash = md5(JSON.stringify(props.prompt));
+    propsPos = { ...propsPos, response: res.data.choices[0], hash };
+    this.queue.enqueue({ ...propsPos });
     return res.data.choices[0];
   }
 };

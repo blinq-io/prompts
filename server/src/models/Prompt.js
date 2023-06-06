@@ -14,7 +14,7 @@ const promptSchema = new mongoose.Schema({
     required: true,
   },
   parameteres: {
-    type: Object,
+    type: [Object, {}],
     required: true,
   },
   response: {
