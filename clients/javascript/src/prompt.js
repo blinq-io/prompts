@@ -82,7 +82,7 @@ exports.PromptCompletion = class PromptCompletion {
     if (!chat) return data;
 
     const messages = [];
-    const parts = promptFileContent.split("####");
+    const parts = data.split("####");
     for (let i = 0; i < parts.length; i++) {
       if (!parts[i].trim()) continue;
       const role = parts[i];
