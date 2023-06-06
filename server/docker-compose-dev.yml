@@ -16,7 +16,9 @@ services:
     networks:
       - app-network
   app:
-    image: devblinq/prompt-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - MONGO_URI=mongodb://db:27017/promptsvr
     networks:
