@@ -17,7 +17,7 @@
     "openai"
   ],
   "scripts": {
-    "pack": "mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./src/queue.js ./build/bin/queue.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
+    "pack": "npm version patch && mkdir build && mkdir build/bin && cp ./src/prompt.js ./build/bin/prompt.js && cp ./src/queue.js ./build/bin/queue.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
     "clean": "rm -rf ./build",
     "build": "npm run clean && npm run pack",
     "test": "mocha --file './test/cacheTest.js' ",

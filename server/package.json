@@ -23,7 +23,7 @@
   "scripts": {
     "test": "jest",
     "start": "nodemon ./src/app.js",
-    "pack": "mkdir build && mkdir build/bin && cp ./src/app.js ./build/bin/app.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
+    "pack": "npm version patch && mkdir build && mkdir build/bin && cp ./src/app.js ./build/bin/app.js && cp ./package.json ./build/package.json && cp ./README.md ./build/README.md",
     "clean": "rm -rf ./build",
     "build": "npm run clean && npm run pack"
   },
