@@ -1,0 +1,27 @@
+version: "3.4"
+volumes:
+  my-db:
+networks:
+  app-network:
+    driver: bridge
+services:
+  db:
+    image: mongo
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    volumes:
+      - my-db:/data/db
+    networks:
+      - app-network
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_URI=mongodb://db:27017/promptsvr
+    networks:
+      - app-network
+    depends_on:
+      - db
