@@ -31,17 +31,18 @@ exports.PromptCompletion = class PromptCompletion {
         try {
           console.log(`${PromptCompletion.queue.length}`);
           if (!PromptCompletion.queue.isEmpty) {
+            console.log(PromptCompletion.queue.head());
             await axios.post(`${this.serverURI}/api/createPrompt`, {
               ...PromptCompletion.queue.dequeue(),
             });
           }
         } catch (error) {
-          if (PromptCompletion.queue.length() >= 100) {
+          if (PromptCompletion.queue.length >= 100) {
             while (PromptCompletion.queue >= 100) {
               PromptCompletion.queue.dequeue();
             }
           }
-          throw error;
+          console.log("Can't access server!");
         }
       }, 2000);
     }
