@@ -25,9 +25,10 @@ exports.PromptCompletion = class PromptCompletion {
     if (!PromptCompletion.queue.isEmpty) {
       setInterval(async () => {
         try {
-          if (!queue.isEmpty) {
+          console.log(`${PromptCompletion.queue.length}`);
+          if (!PromptCompletion.queue.isEmpty) {
             await axios.post(`${this.serverURI}/api/createPrompt`, {
-              ...queue.dequeue(),
+              ...PromptCompletion.queue.dequeue(),
             });
           }
         } catch (error) {
