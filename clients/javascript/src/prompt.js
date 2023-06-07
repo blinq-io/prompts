@@ -108,6 +108,8 @@ exports.PromptCompletion = class PromptCompletion {
     );
     delete props.parameters;
 
+    propsPos = { ...propsPos, prompt: props.messages };
+
     if (process.env.NODE_ENV === "dev") {
       const { hashedCache, hash } = this._getCachePrompt(props.messages);
 
