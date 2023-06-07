@@ -1,7 +1,7 @@
 const NavBar = ({ disabled }) => {
   return (
     <div className="flex">
-      <div className="w-screen bg-slate-200 border border-black">
+      <div className="w-screen bg-slate-200 border border-slate-400">
         <button
           disabled={disabled}
           className={`p-5 duration-100 ${
