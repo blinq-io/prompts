@@ -10,7 +10,7 @@ Having the information stored centrally allows for conducting experiments, such 
 [It's recomended to read the concepts page](https://github.com/blinq-io/prompts/wiki/Concepts-page)
 
 ## Overall solution
-The solution is has 2 main components:
+The solution has 2 main components:
 1. Client - the client uses the same APIs as the OpenAI and it serve as a proxy for the calls to OpenAI APIs. It operate in 2 modes: Development and Production. 
     When the client operate in development mode, it will cache the reponses into a local file. If the request is repeated the client will return the response from the cache without calling the OpenAI API.
     When the client operate in production mode, it will not cache, and optionally can send the request/response to a central server.
