@@ -21,7 +21,7 @@ exports.PromptCompletion = class PromptCompletion {
       ? serverURI
       : process.env.PROMPT_SRV_URI
       ? process.env.PROMPT_SRV_URI
-      : "http://localhost:3000";
+      : "http://localhost:4000";
   }
 
   _initInterval() {
