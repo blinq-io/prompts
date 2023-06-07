@@ -8,3 +8,10 @@ The second feature allows for the uploading of all prompt-related information, s
 Having the information stored centrally allows for conducting experiments, such as modifying the prompt template and measuring performance, or transitioning to a different model version or provider and evaluating performance.
 
 [It's recomended to read the concepts page](https://github.com/blinq-io/prompts/wiki/Concepts-page)
+
+## Overall solution
+The solution is has 2 main components:
+1. Client - the client uses the same APIs as the OpenAI and it serve as a proxy for the calls to OpenAI APIs. It operate in 2 modes: Development and Production. 
+    When the client operate in development mode, it will cache the reponses into a local file. If the request is repeated the client will return the response from the cache without calling the OpenAI API.
+    When the client operate in production mode, it will not cache, and optionally can send the request/response to a central server.
+2. Server - store the message request as well as the reponse and other information. It enable you to classify all the AI request into [AI API](https://github.com/blinq-io/prompts/wiki/Concepts-page) view statistics and run experiments on new prompt templates candidates.
