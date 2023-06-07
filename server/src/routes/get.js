@@ -16,4 +16,9 @@ router.post("/api/getPrompt", async (req, res) => {
   return res.send(isExists);
 });
 
+router.get("/api/getAllPrompts", async (req, res) => {
+  const prompts = await Prompt.find({});
+  res.send(prompts);
+});
+
 exports.getRouter = router;

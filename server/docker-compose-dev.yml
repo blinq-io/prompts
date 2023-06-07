@@ -22,9 +22,9 @@ services:
     environment:
       - MONGO_URI=mongodb://db:27017/promptsvr
     ports:
-      - "3000:3000"
+      - "4000:4000"
     expose:
-      - "3000"
+      - "4000"
     networks:
       - app-network
     depends_on:
