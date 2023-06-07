@@ -1,6 +1,6 @@
 {
   "name": "prompt-eng-server",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A server that saves the cached data from the local prompt-eng cache to a database.",
   "main": "bin/prompt.js",
   "homepage": "https://github.com/blinq-io/prompts",
