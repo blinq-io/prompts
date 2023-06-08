@@ -3,7 +3,7 @@ import Grid from "./Grid";
 const LeftNav = ({ handleOnUnclassified, handleOnClassified, data }) => {
   return (
     <div className="flex">
-      <div className="p-5 w-72 h-screen bg-cyan-200">
+      <div className="p-5 w-48 h-screen bg-cyan-200">
         <h1 className="text-3xl pb-7 font-mono">AI-Apis</h1>
         <button
           onClick={handleOnUnclassified}

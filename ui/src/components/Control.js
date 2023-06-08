@@ -6,15 +6,26 @@ import NavBar from "./NavBar";
 
 const Control = () => {
   const [disabled, setDisabled] = useState(true);
-  const [data, setData] = useState([]);
+  const [getData, setData] = useState([]);
 
   const handleOnUnclassified = async (e) => {
     const uri = process.env.SERVER_URI
       ? process.env.SERVER_URI
       : "http://localhost:4000";
-    const res = await axios.get(`${uri}/api/getAllPrompts`);
-    console.log(res.data);
-    setData(res.data);
+    let { data } = await axios.get(`${uri}/api/getAllPrompts`);
+
+    data = data.map((item) => {
+      let { prompt, response } = item;
+      if (typeof prompt === "object") {
+        prompt = prompt.map((item) => {
+          const content = `${item.role.toUpperCase()}: ${item.content} `;
+          return content;
+        });
+        return { ...item, response: response.message.content, prompt };
+      }
+      return { ...item, response: response.text };
+    });
+    setData(data);
     setDisabled(true);
   };
 
@@ -29,7 +40,7 @@ const Control = () => {
       <LeftNav
         handleOnUnclassified={handleOnUnclassified}
         handleOnClassified={handleOnClassified}
-        data={["data"]}
+        data={getData}
       />
     </div>
   );
