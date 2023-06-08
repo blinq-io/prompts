@@ -4,12 +4,6 @@ const md5 = require("md5");
 const { Queue } = require("./queue");
 
 exports.PromptProxy = class PromptProxy {
-  openai;
-  cache;
-  path;
-  serverURI;
-  MAX_QUEUE_SIZE;
-  isDisabled;
   static isInterval = false;
   static queue = new Queue();
 
