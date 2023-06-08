@@ -14,10 +14,6 @@ const promptSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
-    parameteres: {
-      type: [Object, {}],
-      required: true,
-    },
     response: {
       type: Object,
       required: true,

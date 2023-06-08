@@ -1,48 +1,36 @@
 require("dotenv").config();
-const { OpenAIApi } = require("openai");
 const fs = require("fs");
 const md5 = require("md5");
 const { Queue } = require("./queue");
 const axios = require("axios");
 
-exports.PromptCompletion = class PromptCompletion {
+exports.PromptProxy = class PromptProxy {
   openai;
   cache;
   path;
   serverURI;
+  MAX_QUEUE_SIZE;
   static isInterval = false;
   static queue = new Queue();
 
-  constructor(configuration, path, serverURI) {
-    this.openai = new OpenAIApi(configuration);
+  constructor(openai, path, serverURI, env, MAX_QUEUE_SIZE) {
+    this.openai = openai;
     this.cache = {};
-    this.path = path;
-    this.serverURI = serverURI
-      ? serverURI
-      : process.env.PROMPT_SRV_URI
-      ? process.env.PROMPT_SRV_URI
-      : "http://localhost:4000";
+    this.serverURI = serverURI ? serverURI : process.env.PROMPT_SRV_URI;
+    process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : env;
+    this.MAX_QUEUE_SIZE = MAX_QUEUE_SIZE;
+
+    if (!path) {
+      fs.appendFile("cachcePath.json", JSON.stringify({}));
+    } else {
+      this.path = path;
+    }
   }
 
   _initInterval() {
-    if (!PromptCompletion.isInterval) {
-      PromptCompletion.isInterval = true;
-      setInterval(async () => {
-        try {
-          if (!PromptCompletion.queue.isEmpty) {
-            await axios.post(`${this.serverURI}/api/createPrompt`, {
-              ...PromptCompletion.queue.dequeue(),
-            });
-          }
-        } catch (error) {
-          if (PromptCompletion.queue.length >= 100) {
-            while (PromptCompletion.queue >= 100) {
-              PromptCompletion.queue.dequeue();
-            }
-          }
-          console.log("Can't access server!");
-        }
-      }, 2000);
+    if (!PromptProxy.isInterval) {
+      PromptProxy.isInterval = true;
+      PromptProxy.queue.setQueueInterval(this.MAX_QUEUE_SIZE);
     }
   }
 
@@ -74,14 +62,7 @@ exports.PromptCompletion = class PromptCompletion {
     fs.writeFileSync(this.path, JSON.stringify(this.cache));
   }
 
-  _replacePromptParameters(data, parameters, chat) {
-    if (parameters !== undefined) {
-      for (const key in parameters) {
-        const value = parameters[key];
-        data = data.replaceAll(`{${key}}`, value);
-      }
-    }
-
+  _replacePromptParameters(data, chat) {
     if (!chat) return data;
 
     const messages = [];
@@ -101,12 +82,7 @@ exports.PromptCompletion = class PromptCompletion {
     this._initInterval();
     let propsPos = { ...props, prompt: props.messages };
 
-    props.messages = this._replacePromptParameters(
-      props.messages,
-      props.parameters,
-      true
-    );
-    delete props.parameters;
+    props.messages = this._replacePromptParameters(props.messages, true);
 
     propsPos = { ...propsPos, prompt: props.messages };
 
@@ -121,7 +97,7 @@ exports.PromptCompletion = class PromptCompletion {
       this._setCachePrompt(props.messages, res.data.choices[0]);
 
       propsPos = { ...propsPos, response: res.data.choices[0], hash };
-      PromptCompletion.queue.enqueue({ ...propsPos });
+      PromptProxy.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
@@ -130,7 +106,7 @@ exports.PromptCompletion = class PromptCompletion {
     const hash = md5(JSON.stringify(props.messages));
 
     propsPos = { ...propsPos, response: res.data.choices[0], hash };
-    PromptCompletion.queue.enqueue({ ...propsPos });
+    PromptProxy.queue.enqueue({ ...propsPos });
 
     return res.data.choices[0];
   }
@@ -139,12 +115,7 @@ exports.PromptCompletion = class PromptCompletion {
     this._initInterval();
     let propsPos = { ...props };
 
-    props.prompt = this._replacePromptParameters(
-      props.prompt,
-      props.parameters,
-      false
-    );
-    delete props.parameters;
+    props.prompt = this._replacePromptParameters(props.prompt, false);
     if (process.env.NODE_ENV === "dev") {
       const { hashedCache, hash } = this._getCachePrompt(props.prompt);
 
@@ -156,7 +127,7 @@ exports.PromptCompletion = class PromptCompletion {
       this._setCachePrompt(props.prompt, res.data.choices[0]);
 
       propsPos = { ...propsPos, response: res.data.choices[0], hash };
-      PromptCompletion.queue.enqueue({ ...propsPos });
+      PromptProxy.queue.enqueue({ ...propsPos });
       return res.data.choices[0];
     }
 
@@ -164,7 +135,7 @@ exports.PromptCompletion = class PromptCompletion {
 
     const hash = md5(JSON.stringify(props.prompt));
     propsPos = { ...propsPos, response: res.data.choices[0], hash };
-    PromptCompletion.queue.enqueue({ ...propsPos });
+    PromptProxy.queue.enqueue({ ...propsPos });
     return res.data.choices[0];
   }
 };

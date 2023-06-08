@@ -1,3 +1,5 @@
+const { PromptProxy } = require("./prompt");
+
 exports.Queue = class Queue {
   constructor() {
     this.elements = {};
@@ -22,5 +24,29 @@ exports.Queue = class Queue {
   }
   get isEmpty() {
     return this.length === 0;
+  }
+
+  setQueueInterval(MAX_QUEUE_SIZE) {
+    if (!MAX_QUEUE_SIZE) {
+      MAX_QUEUE_SIZE = 100;
+    }
+
+    PromptProxy.isInterval = true;
+    setInterval(async () => {
+      try {
+        if (!PromptProxy.queue.isEmpty) {
+          await axios.post(`${this.serverURI}/api/createPrompt`, {
+            ...PromptProxy.queue.dequeue(),
+          });
+        }
+      } catch (error) {
+        if (PromptProxy.queue.length >= MAX_QUEUE_SIZE) {
+          while (PromptProxy.queue >= MAX_QUEUE_SIZE) {
+            PromptProxy.queue.dequeue();
+          }
+        }
+        console.log("Can't access server!");
+      }
+    }, 2000);
   }
 };
