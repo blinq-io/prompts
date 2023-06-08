@@ -10,11 +10,13 @@ exports.PromptProxy = class PromptProxy {
   constructor(
     openai,
     serverURI = process.env.PROMPT_SRV_URI,
+    logger,
     path,
     env = process.env.NODE_ENV,
     MAX_QUEUE_SIZE = 100,
     isDisabled = false
   ) {
+    this.logger = logger;
     this.openai = openai;
     this.cache = {};
     this.serverURI = serverURI;
@@ -24,12 +26,31 @@ exports.PromptProxy = class PromptProxy {
     this._setPath(path);
   }
 
+  _logMessage(message, type) {
+    if (type === "error") {
+      if (this.logger) {
+        this.logger.error(message);
+        return;
+      }
+
+      console.error(message);
+    } else {
+      if (this.logger) {
+        this.logger.info(message);
+        return;
+      }
+      console.info(message);
+    }
+  }
+
   _setActive(flag) {
     this.isDisabled = !flag;
 
     if (flag) {
+      this._logMessage("Caching enabled", "info");
       this._initInterval();
     } else {
+      this._logMessage("Caching disabled", "info");
       clearInterval(Queue.interval);
     }
   }
@@ -54,6 +75,7 @@ exports.PromptProxy = class PromptProxy {
 
   _initCache() {
     if (!fs.existsSync(this.path)) {
+      this._logMessage("The path to the cache isn't correct", "error");
       throw new Error("The path to the cache isn't correct");
     }
 
