@@ -8,7 +8,7 @@ JavaScript/Node client for caching and storing prompt/response data while utiliz
 
 ## How to use:
 ### Your code today
-```
+```javascript
 const { Configuration, OpenAIApi } = require("openai");
 
 const configuration = new Configuration({
