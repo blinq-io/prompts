@@ -1,6 +1,8 @@
-const { PromptProxy } = require("./prompt");
+const axios = require("axios");
 
 exports.Queue = class Queue {
+  static interval;
+
   constructor() {
     this.elements = {};
     this.head = 0;
@@ -26,16 +28,11 @@ exports.Queue = class Queue {
     return this.length === 0;
   }
 
-  setQueueInterval(MAX_QUEUE_SIZE) {
-    if (!MAX_QUEUE_SIZE) {
-      MAX_QUEUE_SIZE = 100;
-    }
-
-    PromptProxy.isInterval = true;
-    setInterval(async () => {
+  static setQueueInterval(PromptProxy, serverURI, MAX_QUEUE_SIZE) {
+    Queue.interval = setInterval(async () => {
       try {
         if (!PromptProxy.queue.isEmpty) {
-          await axios.post(`${this.serverURI}/api/createPrompt`, {
+          await axios.post(`${serverURI}/api/createPrompt`, {
             ...PromptProxy.queue.dequeue(),
           });
         }
