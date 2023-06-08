@@ -119,7 +119,7 @@ exports.PromptProxy = class PromptProxy {
       const { status, statusText, data } =
         await this.openai.createChatCompletion({ ...props });
 
-      this._setCachePrompt(props.messages, status, statusText, data);
+      this._setCachePrompt(props.messages, { status, statusText, data });
 
       propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
@@ -152,7 +152,7 @@ exports.PromptProxy = class PromptProxy {
         ...props,
       });
 
-      this._setCachePrompt(props.prompt, status, statusText, data);
+      this._setCachePrompt(props.prompt, { status, statusText, data });
 
       propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
