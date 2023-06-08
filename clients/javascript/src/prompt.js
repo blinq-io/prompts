@@ -9,12 +9,14 @@ exports.PromptProxy = class PromptProxy {
 
   constructor(
     openai,
-    serverURI = process.env.PROMPT_SRV_URI,
-    logger,
-    path,
-    env = process.env.NODE_ENV,
-    MAX_QUEUE_SIZE = 100,
-    isDisabled = false
+    {
+      serverURI = process.env.PROMPT_SRV_URI,
+      logger,
+      path,
+      env = process.env.NODE_ENV,
+      MAX_QUEUE_SIZE = 100,
+      isDisabled = false,
+    }
   ) {
     this.logger = logger;
     this.openai = openai;
