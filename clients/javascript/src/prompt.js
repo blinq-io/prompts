@@ -2,7 +2,6 @@ require("dotenv").config();
 const fs = require("fs");
 const md5 = require("md5");
 const { Queue } = require("./queue");
-const axios = require("axios");
 
 exports.PromptProxy = class PromptProxy {
   openai;
@@ -10,27 +9,52 @@ exports.PromptProxy = class PromptProxy {
   path;
   serverURI;
   MAX_QUEUE_SIZE;
+  isDisabled;
   static isInterval = false;
   static queue = new Queue();
 
-  constructor(openai, path, serverURI, env, MAX_QUEUE_SIZE) {
+  constructor(
+    openai,
+    path,
+    serverURI = process.env.PROMPT_SRV_URI,
+    env = process.env.NODE_ENV,
+    MAX_QUEUE_SIZE = 100,
+    isDisabled = false
+  ) {
     this.openai = openai;
     this.cache = {};
-    this.serverURI = serverURI ? serverURI : process.env.PROMPT_SRV_URI;
-    process.env.NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : env;
+    this.serverURI = serverURI;
+    process.env.NODE_ENV = env;
     this.MAX_QUEUE_SIZE = MAX_QUEUE_SIZE;
+    this.isDisabled = isDisabled;
+    this._setPath(path);
+  }
 
-    if (!path) {
-      fs.appendFile("cachcePath.json", JSON.stringify({}));
+  _setActive(flag) {
+    this.isDisabled = !flag;
+
+    if (flag) {
+      this._initInterval();
+    } else {
+      clearInterval(Queue.interval);
+    }
+  }
+
+  _setPath(path) {
+    if (!path && process.env.NODE_ENV === "dev") {
+      if (!fs.existsSync("./cachePath.json")) {
+        fs.appendFileSync("cachePath.json", JSON.stringify({}));
+      }
+      this.path = "./cachePath.json";
     } else {
       this.path = path;
     }
   }
 
   _initInterval() {
-    if (!PromptProxy.isInterval) {
+    if (!PromptProxy.isInterval && !this.isDisabled) {
       PromptProxy.isInterval = true;
-      PromptProxy.queue.setQueueInterval(this.MAX_QUEUE_SIZE);
+      Queue.setQueueInterval(PromptProxy, this.serverURI, this.MAX_QUEUE_SIZE);
     }
   }
 
@@ -86,7 +110,7 @@ exports.PromptProxy = class PromptProxy {
 
     propsPos = { ...propsPos, prompt: props.messages };
 
-    if (process.env.NODE_ENV === "dev") {
+    if (process.env.NODE_ENV === "dev" && !this.isDisabled) {
       const { hashedCache, hash } = this._getCachePrompt(props.messages);
 
       if (hashedCache !== null) {
@@ -116,7 +140,7 @@ exports.PromptProxy = class PromptProxy {
     let propsPos = { ...props };
 
     props.prompt = this._replacePromptParameters(props.prompt, false);
-    if (process.env.NODE_ENV === "dev") {
+    if (process.env.NODE_ENV === "dev" && !this.isDisabled) {
       const { hashedCache, hash } = this._getCachePrompt(props.prompt);
 
       if (hashedCache !== null) {
