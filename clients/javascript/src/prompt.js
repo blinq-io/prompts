@@ -116,26 +116,26 @@ exports.PromptProxy = class PromptProxy {
       if (hashedCache !== null) {
         return hashedCache;
       }
-      const { status, statustext, data } =
+      const { status, statusText, data } =
         await this.openai.createChatCompletion({ ...props });
 
-      this._setCachePrompt(props.messages, status, statustext, data);
+      this._setCachePrompt(props.messages, status, statusText, data);
 
-      propsPos = { ...propsPos, response: { status, statustext, data }, hash };
+      propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return { status, statustext, data };
+      return { status, statusText, data };
     }
 
-    const { status, statustext, data } = await this.openai.createChatCompletion(
+    const { status, statusText, data } = await this.openai.createChatCompletion(
       { ...props }
     );
 
     const hash = md5(JSON.stringify(props.messages));
 
-    propsPos = { ...propsPos, response: { status, statustext, data }, hash };
+    propsPos = { ...propsPos, response: { status, statusText, data }, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
 
-    return { status, statustext, data };
+    return { status, statusText, data };
   }
 
   async createCompletion(props) {
@@ -148,24 +148,24 @@ exports.PromptProxy = class PromptProxy {
       if (hashedCache !== null) {
         return hashedCache;
       }
-      const { status, statustext, data } = await this.openai.createCompletion({
+      const { status, statusText, data } = await this.openai.createCompletion({
         ...props,
       });
 
-      this._setCachePrompt(props.prompt, status, statustext, data);
+      this._setCachePrompt(props.prompt, status, statusText, data);
 
-      propsPos = { ...propsPos, response: { status, statustext, data }, hash };
+      propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return { status, statustext, data };
+      return { status, statusText, data };
     }
 
-    const { status, statustext, data } = await this.openai.createCompletion({
+    const { status, statusText, data } = await this.openai.createCompletion({
       ...props,
     });
 
     const hash = md5(JSON.stringify(props.prompt));
-    propsPos = { ...propsPos, response: { status, statustext, data }, hash };
+    propsPos = { ...propsPos, response: { status, statusText, data }, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
-    return { status, statustext, data };
+    return { status, statusText, data };
   }
 };
