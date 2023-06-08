@@ -102,27 +102,9 @@ exports.PromptProxy = class PromptProxy {
     fs.writeFileSync(this.path, JSON.stringify(this.cache));
   }
 
-  _replacePromptParameters(data, chat) {
-    if (!chat) return data;
-
-    const messages = [];
-    const parts = data.split("####");
-    for (let i = 0; i < parts.length; i++) {
-      if (!parts[i].trim()) continue;
-      const role = parts[i];
-      const prompt = parts[i + 1];
-      messages.push({ role, content: prompt.trim() });
-      i++;
-    }
-
-    return messages;
-  }
-
   async createChatCompletion(props) {
     this._initInterval();
     let propsPos = { ...props, prompt: props.messages };
-
-    props.messages = this._replacePromptParameters(props.messages, true);
 
     propsPos = { ...propsPos, prompt: props.messages };
 
@@ -134,28 +116,27 @@ exports.PromptProxy = class PromptProxy {
       }
       const res = await this.openai.createChatCompletion({ ...props });
 
-      this._setCachePrompt(props.messages, res.data.choices[0]);
+      this._setCachePrompt(props.messages, res.data);
 
-      propsPos = { ...propsPos, response: res.data.choices[0], hash };
+      propsPos = { ...propsPos, response: res.data, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return res.data.choices[0];
+      return res.data;
     }
 
     const res = await this.openai.createChatCompletion({ ...props });
 
     const hash = md5(JSON.stringify(props.messages));
 
-    propsPos = { ...propsPos, response: res.data.choices[0], hash };
+    propsPos = { ...propsPos, response: res.data, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
 
-    return res.data.choices[0];
+    return res.data;
   }
 
   async createCompletion(props) {
     this._initInterval();
     let propsPos = { ...props };
 
-    props.prompt = this._replacePromptParameters(props.prompt, false);
     if (process.env.NODE_ENV === "dev" && !this.isDisabled) {
       const { hashedCache, hash } = this._getCachePrompt(props.prompt);
 
@@ -164,18 +145,18 @@ exports.PromptProxy = class PromptProxy {
       }
       const res = await this.openai.createCompletion({ ...props });
 
-      this._setCachePrompt(props.prompt, res.data.choices[0]);
+      this._setCachePrompt(props.prompt, res.data);
 
-      propsPos = { ...propsPos, response: res.data.choices[0], hash };
+      propsPos = { ...propsPos, response: res.data, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return res.data.choices[0];
+      return res.data;
     }
 
     const res = await this.openai.createCompletion({ ...props });
 
     const hash = md5(JSON.stringify(props.prompt));
-    propsPos = { ...propsPos, response: res.data.choices[0], hash };
+    propsPos = { ...propsPos, response: res.data, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
-    return res.data.choices[0];
+    return res.data;
   }
 };
