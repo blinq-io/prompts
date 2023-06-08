@@ -16,7 +16,7 @@ exports.PromptProxy = class PromptProxy {
       env = process.env.NODE_ENV,
       MAX_QUEUE_SIZE = 100,
       isDisabled = false,
-    }
+    } = {}
   ) {
     this.logger = logger;
     this.openai = openai;
