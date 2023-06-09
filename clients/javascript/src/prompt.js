@@ -19,40 +19,28 @@ exports.PromptProxy = class PromptProxy {
     } = {}
   ) {
     this.logger = logger;
+    if (!this.logger) {
+      this.logger = console;
+    }
     this.openai = openai;
     this.cache = {};
     this.serverURI = serverURI;
-    process.env.NODE_ENV = env;
+    if (env) {
+      process.env.NODE_ENV = env;
+    }
     this.MAX_QUEUE_SIZE = MAX_QUEUE_SIZE;
     this.isDisabled = isDisabled;
     this._setPath(path);
-  }
-
-  _logMessage(message, type) {
-    if (type === "error") {
-      if (this.logger) {
-        this.logger.error(message);
-        return;
-      }
-
-      console.error(message);
-    } else {
-      if (this.logger) {
-        this.logger.info(message);
-        return;
-      }
-      console.info(message);
-    }
   }
 
   _setActive(flag) {
     this.isDisabled = !flag;
 
     if (flag) {
-      this._logMessage("Caching enabled", "info");
+      this.logger.info("Caching enabled");
       this._initInterval();
     } else {
-      this._logMessage("Caching disabled", "info");
+      this.logger.info("Caching disabled");
       clearInterval(Queue.interval);
     }
   }
@@ -77,8 +65,8 @@ exports.PromptProxy = class PromptProxy {
 
   _initCache() {
     if (!fs.existsSync(this.path)) {
-      this._logMessage("The path to the cache isn't correct", "error");
-      throw new Error("The path to the cache isn't correct");
+      this.logger.error("The path to the cache isn't correct", this.path);
+      throw new Error("The path to the cache isn't correct " + this.path);
     }
 
     this.cache = JSON.parse(fs.readFileSync(this.path));
