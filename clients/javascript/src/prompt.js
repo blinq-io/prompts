@@ -59,10 +59,10 @@ exports.PromptProxy = class PromptProxy {
 
   _setPath(path) {
     if (!path && process.env.NODE_ENV === "dev") {
-      if (!fs.existsSync("./cachePath.json")) {
-        fs.appendFileSync("cachePath.json", JSON.stringify({}));
+      if (!fs.existsSync("./.prompts_cache.json")) {
+        fs.appendFileSync("./.prompts_cache.json", JSON.stringify({}));
       }
-      this.path = "./cachePath.json";
+      this.path = "./.prompts_cache.json";
     } else {
       this.path = path;
     }
@@ -108,22 +108,24 @@ exports.PromptProxy = class PromptProxy {
     this._initInterval();
     let propsPos = { ...props, prompt: props.messages };
 
-    propsPos = { ...propsPos, prompt: props.messages };
-
     if (process.env.NODE_ENV === "dev" && !this.isDisabled) {
-      const { hashedCache, hash } = this._getCachePrompt(props.messages);
+      const { hashedCache, hash } = this._getCachePrompt(props);
 
       if (hashedCache !== null) {
         return hashedCache;
       }
-      const { status, statusText, data } =
-        await this.openai.createChatCompletion({ ...props });
 
-      this._setCachePrompt(props.messages, { status, statusText, data });
+      const result = await this.openai.createChatCompletion({ ...props });
+
+      this._setCachePrompt(props, {
+        status: result.status,
+        statusText: result.statusText,
+        data: result.data,
+      });
 
       propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return { status, statusText, data };
+      return result;
     }
 
     const { status, statusText, data } = await this.openai.createChatCompletion(
@@ -143,7 +145,7 @@ exports.PromptProxy = class PromptProxy {
     let propsPos = { ...props };
 
     if (process.env.NODE_ENV === "dev" && !this.isDisabled) {
-      const { hashedCache, hash } = this._getCachePrompt(props.prompt);
+      const { hashedCache, hash } = this._getCachePrompt(props);
 
       if (hashedCache !== null) {
         return hashedCache;
@@ -152,7 +154,7 @@ exports.PromptProxy = class PromptProxy {
         ...props,
       });
 
-      this._setCachePrompt(props.prompt, { status, statusText, data });
+      this._setCachePrompt(props, { status, statusText, data });
 
       propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
