@@ -28,7 +28,7 @@ router.get("/api/getPromptsCount", async (req, res) => {
 
 router.get("/api/getPage", async (req, res) => {
   const pageNum = req.query.page;
-  const MAX_PAGES_IN_PAGE = 20;
+  const MAX_PAGES_IN_PAGE = 10;
   const startPage = pageNum * MAX_PAGES_IN_PAGE;
 
   const prompts = await Prompt.find({})
