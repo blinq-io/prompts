@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 import LeftNav from "./LeftNav";
@@ -7,12 +7,22 @@ import NavBar from "./NavBar";
 const Control = () => {
   const [disabled, setDisabled] = useState(true);
   const [getData, setData] = useState([]);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_SERVER_URI}/api/getPromptsCount`
+      );
+      setCount(data);
+    };
+    fetch();
+  }, []);
 
   const handleOnUnclassified = async (e) => {
-    const uri = process.env.SERVER_URI
-      ? process.env.SERVER_URI
-      : "http://localhost:4000";
-    let { data } = await axios.get(`${uri}/api/getAllPrompts`);
+    let { data } = await axios.get(
+      `${process.env.REACT_APP_SERVER_URI}/api/getAllPrompts`
+    );
 
     data = data.map((item) => {
       let { prompt, response } = item;

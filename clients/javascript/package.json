@@ -1,6 +1,6 @@
 {
   "name": "prompt-eng",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "description": "Tool for prompt caching openai gpt responses. It will store your prompt template as well as parameters in local cache and use it next time you send the same request.",
   "main": "bin/prompt.js",
   "homepage": "https://github.com/blinq-io/prompts",
