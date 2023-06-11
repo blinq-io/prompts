@@ -11,7 +11,7 @@ exports.PromptProxy = class PromptProxy {
     openai,
     {
       serverURI = process.env.PROMPT_SRV_URI,
-      logger,
+      logger = console,
       path,
       env = process.env.NODE_ENV,
       MAX_QUEUE_SIZE = 100,
@@ -19,9 +19,6 @@ exports.PromptProxy = class PromptProxy {
     } = {}
   ) {
     this.logger = logger;
-    if (!this.logger) {
-      this.logger = console;
-    }
     this.openai = openai;
     this.cache = {};
     this.serverURI = serverURI;
@@ -69,7 +66,12 @@ exports.PromptProxy = class PromptProxy {
       throw new Error("The path to the cache isn't correct " + this.path);
     }
 
-    this.cache = JSON.parse(fs.readFileSync(this.path));
+    try {
+      this.cache = JSON.parse(fs.readFileSync(this.path));
+    } catch (error) {
+      this.logger.error("Cache file is corrupted, initiating file...");
+      this.cache = {};
+    }
   }
 
   _getCachePrompt(data) {
@@ -104,28 +106,33 @@ exports.PromptProxy = class PromptProxy {
       }
 
       const result = await this.openai.createChatCompletion({ ...props });
+      const { status, statusText, data } = result;
 
       this._setCachePrompt(props, {
-        status: result.status,
-        statusText: result.statusText,
-        data: result.data,
+        status,
+        statusText,
+        data,
       });
 
-      propsPos = { ...propsPos, response: { status, statusText, data }, hash };
+      propsPos = {
+        ...propsPos,
+        response: { status, statusText, data },
+        hash,
+      };
       PromptProxy.queue.enqueue({ ...propsPos });
       return result;
     }
 
-    const { status, statusText, data } = await this.openai.createChatCompletion(
-      { ...props }
-    );
+    const result = await this.openai.createChatCompletion({ ...props });
+
+    const { status, statusText, data } = result;
 
     const hash = md5(JSON.stringify(props.messages));
 
     propsPos = { ...propsPos, response: { status, statusText, data }, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
 
-    return { status, statusText, data };
+    return result;
   }
 
   async createCompletion(props) {
@@ -138,24 +145,28 @@ exports.PromptProxy = class PromptProxy {
       if (hashedCache !== null) {
         return hashedCache;
       }
-      const { status, statusText, data } = await this.openai.createCompletion({
+      const result = await this.openai.createCompletion({
         ...props,
       });
+
+      const { status, statusText, data } = result;
 
       this._setCachePrompt(props, { status, statusText, data });
 
       propsPos = { ...propsPos, response: { status, statusText, data }, hash };
       PromptProxy.queue.enqueue({ ...propsPos });
-      return { status, statusText, data };
+      return result;
     }
 
-    const { status, statusText, data } = await this.openai.createCompletion({
+    const result = await this.openai.createCompletion({
       ...props,
     });
+
+    const { status, statusText, data } = result;
 
     const hash = md5(JSON.stringify(props.prompt));
     propsPos = { ...propsPos, response: { status, statusText, data }, hash };
     PromptProxy.queue.enqueue({ ...propsPos });
-    return { status, statusText, data };
+    return result;
   }
 };
