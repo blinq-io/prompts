@@ -1,50 +1,26 @@
 import { useState } from "react";
-import axios from "axios";
-
 import LeftNav from "./LeftNav";
 import NavBar from "./NavBar";
 
 const Control = () => {
-  const [disabled, setDisabled] = useState(true);
-  const [getData, setData] = useState([]);
+  const [classified, setClassified] = useState(false);
 
   const handleOnUnclassified = async (e) => {
-    let { data } = await axios.get(
-      `${process.env.REACT_APP_SERVER_URI}/api/getAllPrompts`
-    );
-
-    data = data.map((item) => {
-      let { prompt, response } = item;
-      if (typeof prompt === "object") {
-        prompt = prompt.map((item) => {
-          const content = `${item.role.toUpperCase()}: ${item.content} `;
-
-          return content;
-        });
-        return {
-          ...item,
-          response: response.data.choices[0].message.content,
-          prompt,
-        };
-      }
-      return { ...item, response: response.data.choices[0].text };
-    });
-    setData(data);
-    setDisabled(true);
+    setClassified(false);
   };
 
   const handleOnClassified = async (e) => {
-    setDisabled(false);
-    setData([]);
+    setClassified(true);
   };
 
   return (
     <div>
-      <NavBar disabled={disabled} />
+      {classified && <NavBar />}
+
       <LeftNav
         handleOnUnclassified={handleOnUnclassified}
         handleOnClassified={handleOnClassified}
-        data={getData}
+        classefied={classified}
       />
     </div>
   );

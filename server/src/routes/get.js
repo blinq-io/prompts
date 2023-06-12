@@ -1,5 +1,6 @@
 const { Prompt } = require("../models/Prompt");
 const { Router } = require("express");
+const { Regex } = require("../models/Regex");
 
 const router = Router();
 
@@ -35,6 +36,11 @@ router.get("/api/getPage", async (req, res) => {
     .skip(startPage)
     .limit(MAX_PAGES_IN_PAGE);
   return res.send(prompts);
+});
+
+router.get("/api/getAllRegex", async (req, res) => {
+  const regex = await Regex.find({});
+  res.send(regex);
 });
 
 exports.getRouter = router;

@@ -18,6 +18,10 @@ const promptSchema = new mongoose.Schema(
       type: Object,
       required: true,
     },
+    classified: {
+      type: Boolean,
+      required: true,
+    },
     suffix: {
       type: String,
     },
