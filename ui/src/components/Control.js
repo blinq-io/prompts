@@ -1,6 +1,5 @@
 import { useState } from "react";
-import LeftNav from "./LeftNav";
-import NavBar from "./NavBar";
+import LeftNav from "./Navbars/LeftNav";
 
 const Control = () => {
   const [classified, setClassified] = useState(false);
@@ -15,8 +14,6 @@ const Control = () => {
 
   return (
     <div>
-      {classified && <NavBar />}
-
       <LeftNav
         handleOnUnclassified={handleOnUnclassified}
         handleOnClassified={handleOnClassified}

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
-import ShowRow from "./ShowRow";
+import ShowUnclassifiedRow from "../Rows/ShowUnclassifiedRow";
 
-const UnclassifiedGrid = ({ data }) => {
+const UnclassifiedGrid = () => {
   const [count, setCount] = useState(0);
   const [rows, setRows] = useState([]);
   const [rowData, setRowData] = useState({});
@@ -38,7 +38,7 @@ const UnclassifiedGrid = ({ data }) => {
 
   const handleRows = async (page = 0) => {
     const res = await axios.get(
-      `${process.env.REACT_APP_SERVER_URI}/api/getPage?page=${page}`
+      `${process.env.REACT_APP_SERVER_URI}/api/getUnclassifedPage?page=${page}`
     );
     setRows(
       res.data.map((prompt) => {
@@ -66,9 +66,9 @@ const UnclassifiedGrid = ({ data }) => {
     );
   };
 
-  return count > 0 ? (
+  return (
     <div className="w-11/12">
-      {rowActive && <ShowRow data={rowData} onRowOut={onRowOut} />}
+      {rowActive && <ShowUnclassifiedRow data={rowData} onRowOut={onRowOut} />}
       <DataGrid
         onRowClick={onRowClick}
         rowCount={count}
@@ -84,8 +84,6 @@ const UnclassifiedGrid = ({ data }) => {
         }}
       />
     </div>
-  ) : (
-    <h1>Nothing to see here!</h1>
   );
 };
 

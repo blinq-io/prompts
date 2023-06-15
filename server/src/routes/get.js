@@ -23,19 +23,33 @@ router.get("/api/getAllPrompts", async (req, res) => {
 });
 
 router.get("/api/getPromptsCount", async (req, res) => {
-  const length = await Prompt.countDocuments({});
+  const length = await Prompt.countDocuments({ classified: false });
   res.send(String(length));
 });
 
-router.get("/api/getPage", async (req, res) => {
+router.get("/api/getRegexCount", async (req, res) => {
+  const length = await Regex.countDocuments({});
+  res.send(String(length));
+});
+
+router.get("/api/getUnclassifedPage", async (req, res) => {
   const pageNum = req.query.page;
   const MAX_PAGES_IN_PAGE = 10;
   const startPage = pageNum * MAX_PAGES_IN_PAGE;
 
-  const prompts = await Prompt.find({})
+  const prompts = await Prompt.find({ classified: false })
     .skip(startPage)
     .limit(MAX_PAGES_IN_PAGE);
   return res.send(prompts);
+});
+
+router.get("/api/getClassifiedPage", async (req, res) => {
+  const pageNum = req.query.page;
+  const MAX_PAGES_IN_PAGE = 10;
+  const startPage = pageNum * MAX_PAGES_IN_PAGE;
+
+  const regex = await Regex.find({}).skip(startPage).limit(MAX_PAGES_IN_PAGE);
+  return res.send(regex);
 });
 
 router.get("/api/getAllRegex", async (req, res) => {

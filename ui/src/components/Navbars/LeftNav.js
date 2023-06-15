@@ -1,4 +1,5 @@
-import UnclassifiedGrid from "./UnclassifiedGrid";
+import ClassifiedGrid from "../Grids/ClassifiedGrid";
+import UnclassifiedGrid from "../Grids/UnclassifiedGrid";
 
 const LeftNav = ({ handleOnUnclassified, handleOnClassified, classefied }) => {
   return (
@@ -18,7 +19,7 @@ const LeftNav = ({ handleOnUnclassified, handleOnClassified, classefied }) => {
           Classified
         </button>
       </div>
-      {!classefied ? <UnclassifiedGrid /> : <h1>Nothing to see here!</h1>}
+      {!classefied ? <UnclassifiedGrid /> : <ClassifiedGrid />}
     </div>
   );
 };

@@ -1,7 +1,7 @@
-import TableRow from "../UI/TableRow";
-import { BackdropDiv, ModelDiv } from "./styles/popup.style";
+import TableRow from "../../UI/TableRow";
+import { BackdropDiv, ModelDiv } from "../../styles/popup.style";
 
-const ShowRow = ({ data, onRowOut }) => {
+const ShowUnclassifiedRow = ({ data, onRowOut }) => {
   return (
     <div>
       <BackdropDiv onClick={onRowOut} />
@@ -27,4 +27,4 @@ const ShowRow = ({ data, onRowOut }) => {
   );
 };
 
-export default ShowRow;
+export default ShowUnclassifiedRow;

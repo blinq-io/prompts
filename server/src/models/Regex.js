@@ -9,6 +9,10 @@ const regexSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
+  response: {
+    type: Array,
+    required: true,
+  },
 });
 
 const Regex = mongoose.model("Regex", regexSchema);
