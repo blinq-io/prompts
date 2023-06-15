@@ -1,6 +1,7 @@
-import Grid from "./Grid";
+import ClassifiedGrid from "../Grids/ClassifiedGrid";
+import UnclassifiedGrid from "../Grids/UnclassifiedGrid";
 
-const LeftNav = ({ handleOnUnclassified, handleOnClassified, data }) => {
+const LeftNav = ({ handleOnUnclassified, handleOnClassified, classefied }) => {
   return (
     <div className="flex">
       <div className="p-5 w-48 h-screen bg-cyan-200">
@@ -18,7 +19,7 @@ const LeftNav = ({ handleOnUnclassified, handleOnClassified, data }) => {
           Classified
         </button>
       </div>
-      {data.length > 0 ? <Grid data={data} /> : <h1>Nothing to see here!</h1>}
+      {!classefied ? <UnclassifiedGrid /> : <ClassifiedGrid />}
     </div>
   );
 };
