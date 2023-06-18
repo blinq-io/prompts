@@ -104,8 +104,17 @@ exports.PromptProxy = class PromptProxy {
       if (hashedCache !== null) {
         return hashedCache;
       }
-
+      const startTime = new Date();
       const result = await this.openai.createChatCompletion({ ...props });
+
+      const endTime = new Date();
+      const duration = endTime - startTime;
+      const minutes = Math.floor(duration / 60000);
+      const seconds = ((duration % 60000) / 1000).toFixed(2);
+      const responseTime = `${
+        minutes > 0 && `${minutes} minutes and`
+      } ${seconds} seconds`;
+
       const { status, statusText, data } = result;
 
       this._setCachePrompt(props, {
@@ -117,19 +126,33 @@ exports.PromptProxy = class PromptProxy {
       propsPos = {
         ...propsPos,
         response: { status, statusText, data },
+        responseTime,
         hash,
       };
       PromptProxy.queue.enqueue({ ...propsPos });
       return result;
     }
-
+    const startTime = new Date();
     const result = await this.openai.createChatCompletion({ ...props });
+
+    const endTime = new Date();
+    const duration = endTime - startTime;
+    const minutes = Math.floor(duration / 60000);
+    const seconds = ((duration % 60000) / 1000).toFixed(2);
+    const responseTime = `${
+      minutes > 0 && `${minutes} minutes and`
+    } ${seconds} seconds`;
 
     const { status, statusText, data } = result;
 
     const hash = md5(JSON.stringify(props.messages));
 
-    propsPos = { ...propsPos, response: { status, statusText, data }, hash };
+    propsPos = {
+      ...propsPos,
+      response: { status, statusText, data },
+      responseTime,
+      hash,
+    };
     PromptProxy.queue.enqueue({ ...propsPos });
 
     return result;
@@ -145,27 +168,55 @@ exports.PromptProxy = class PromptProxy {
       if (hashedCache !== null) {
         return hashedCache;
       }
+      const startTime = new Date();
       const result = await this.openai.createCompletion({
         ...props,
       });
+
+      const endTime = new Date();
+      const duration = endTime - startTime;
+      const minutes = Math.floor(duration / 60000);
+      const seconds = ((duration % 60000) / 1000).toFixed(2);
+      const responseTime = `${
+        minutes > 0 && `${minutes} minutes and`
+      } ${seconds} seconds`;
 
       const { status, statusText, data } = result;
 
       this._setCachePrompt(props, { status, statusText, data });
 
-      propsPos = { ...propsPos, response: { status, statusText, data }, hash };
+      propsPos = {
+        ...propsPos,
+        response: { status, statusText, data },
+        responseTime,
+        hash,
+      };
       PromptProxy.queue.enqueue({ ...propsPos });
       return result;
     }
 
+    const startTime = new Date();
     const result = await this.openai.createCompletion({
       ...props,
     });
 
+    const endTime = new Date();
+    const duration = endTime - startTime;
+    const minutes = Math.floor(duration / 60000);
+    const seconds = ((duration % 60000) / 1000).toFixed(2);
+    const responseTime = `${
+      minutes > 0 && `${minutes} minutes and`
+    } ${seconds} seconds`;
+
     const { status, statusText, data } = result;
 
     const hash = md5(JSON.stringify(props.prompt));
-    propsPos = { ...propsPos, response: { status, statusText, data }, hash };
+    propsPos = {
+      ...propsPos,
+      response: { status, statusText, data },
+      responseTime,
+      hash,
+    };
     PromptProxy.queue.enqueue({ ...propsPos });
     return result;
   }
