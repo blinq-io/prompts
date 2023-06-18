@@ -112,8 +112,8 @@ exports.PromptProxy = class PromptProxy {
       const minutes = Math.floor(duration / 60000);
       const seconds = ((duration % 60000) / 1000).toFixed(2);
       const responseTime = `${
-        minutes > 0 && `${minutes} minutes and`
-      } ${seconds} seconds`;
+        minutes > 0 ? `${minutes} minutes and ` : ""
+      }${seconds} seconds`;
 
       const { status, statusText, data } = result;
 
@@ -140,8 +140,8 @@ exports.PromptProxy = class PromptProxy {
     const minutes = Math.floor(duration / 60000);
     const seconds = ((duration % 60000) / 1000).toFixed(2);
     const responseTime = `${
-      minutes > 0 && `${minutes} minutes and`
-    } ${seconds} seconds`;
+      minutes > 0 ? `${minutes} minutes and ` : ""
+    }${seconds} seconds`;
 
     const { status, statusText, data } = result;
 
@@ -178,8 +178,8 @@ exports.PromptProxy = class PromptProxy {
       const minutes = Math.floor(duration / 60000);
       const seconds = ((duration % 60000) / 1000).toFixed(2);
       const responseTime = `${
-        minutes > 0 && `${minutes} minutes and`
-      } ${seconds} seconds`;
+        minutes > 0 ? `${minutes} minutes and ` : ""
+      }${seconds} seconds`;
 
       const { status, statusText, data } = result;
 
@@ -205,8 +205,8 @@ exports.PromptProxy = class PromptProxy {
     const minutes = Math.floor(duration / 60000);
     const seconds = ((duration % 60000) / 1000).toFixed(2);
     const responseTime = `${
-      minutes > 0 && `${minutes} minutes and`
-    } ${seconds} seconds`;
+      minutes > 0 ? `${minutes} minutes and ` : ""
+    }${seconds} seconds`;
 
     const { status, statusText, data } = result;
 
