@@ -1,6 +1,6 @@
 const { Prompt } = require("../models/Prompt");
 const { Router } = require("express");
-const { Regex } = require("../models/Regex");
+const { Template } = require("../models/Template");
 
 const router = Router();
 
@@ -27,8 +27,8 @@ router.get("/api/getPromptsCount", async (req, res) => {
   res.send(String(length));
 });
 
-router.get("/api/getRegexCount", async (req, res) => {
-  const length = await Regex.countDocuments({});
+router.get("/api/getTemplateCount", async (req, res) => {
+  const length = await Template.countDocuments({});
   res.send(String(length));
 });
 
@@ -48,13 +48,15 @@ router.get("/api/getClassifiedPage", async (req, res) => {
   const MAX_PAGES_IN_PAGE = 10;
   const startPage = pageNum * MAX_PAGES_IN_PAGE;
 
-  const regex = await Regex.find({}).skip(startPage).limit(MAX_PAGES_IN_PAGE);
-  return res.send(regex);
+  const template = await Template.find({})
+    .skip(startPage)
+    .limit(MAX_PAGES_IN_PAGE);
+  return res.send(template);
 });
 
-router.get("/api/getAllRegex", async (req, res) => {
-  const regex = await Regex.find({});
-  res.send(regex);
+router.get("/api/getAllTemplate", async (req, res) => {
+  const template = await Template.find({});
+  res.send(template);
 });
 
 exports.getRouter = router;

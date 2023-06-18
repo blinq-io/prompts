@@ -1,28 +1,38 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
-import NavBar from "../Navbars/NavBar";
+import ClassifiedPopper from "../Popper/ClassifiedPopper";
 
 const ClassifiedGrid = () => {
   const [count, setCount] = useState(0);
   const [rows, setRows] = useState([]);
   const [rowData, setRowData] = useState({});
-  const [rowActive, setRowActive] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [open, setOpen] = useState({});
+
   const columns = [
+    { field: "name", headerName: "Name", width: 150 },
+    { field: "prompt", headerName: "Prompt", width: 450 },
     { field: "regex", headerName: "Regex", width: 150 },
     {
-      field: "list",
-      headerName: "List",
-      width: 150,
-      renderCell: (e) => e.row.list.length,
+      field: "pramas",
+      headerName: "Parameters",
+      width: 200,
+      renderCell: (e) => e.row.params.length,
     },
+    {
+      field: "groups",
+      headerName: "Groups",
+      width: 150,
+      renderCell: (e) => e.row.groups.length,
+    },
+    { field: "response", headerName: "Response", width: 450 },
   ];
 
   useEffect(() => {
     const fetch = async () => {
       const res = await axios.get(
-        `${process.env.REACT_APP_SERVER_URI}/api/getRegexCount`
+        `${process.env.REACT_APP_SERVER_URI}/api/getTemplateCount`
       );
       setCount(res.data);
       handleRows();
@@ -38,10 +48,16 @@ const ClassifiedGrid = () => {
       res.data.map((item) => {
         return {
           id: item._id,
+          name: item.name,
+          prompt: item.prompt,
           regex: item.regex,
-          list: {
-            length: `List count: ${Object.values(item.list[0])[0].length}`,
-            data: item.list,
+          params: {
+            length: `Param count: ${item.params.length}`,
+            data: item.params,
+          },
+          groups: {
+            length: `Group count: ${Object.keys(item.groups).length}`,
+            data: item.groups,
           },
           response: item.response,
         };
@@ -49,21 +65,19 @@ const ClassifiedGrid = () => {
     );
   };
 
-  const handleOnRowClick = (e) => {
-    setRowData(e.row);
-    setRowActive(true);
+  const handleOnRowClick = (row, e) => {
+    setRowData(row.row);
+    if (row.row.name === open.name) {
+      setOpen({ open: false, name: "" });
+    } else {
+      setOpen({ open: true, name: row.row.name });
+    }
+    setAnchorEl(e.currentTarget);
   };
-
-  const onRowOut = () => {
-    setRowData({});
-    setRowActive(false);
-  };
-
-  //<NavBar />;
 
   return (
     <div className="w-11/12">
-      {rowActive && <ShowClassifiedRow data={rowData} onRowOut={onRowOut} />}
+      <ClassifiedPopper open={open} anchorEl={anchorEl} data={rowData} />
       <DataGrid
         rows={rows}
         rowCount={count}
