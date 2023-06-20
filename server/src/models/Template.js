@@ -18,10 +18,14 @@ const regexSchema = new mongoose.Schema({
     required: true,
   },
   prompt: {
-    type: mongoose.Schema.Types.Mixed,
+    type: Array,
     required: true,
   },
   response: {
+    type: Array,
+    required: true,
+  },
+  statistics: {
     type: Object,
     required: true,
   },

@@ -1,18 +1,17 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import ClassifiedPopper from "../Popper/ClassifiedPopper";
+import ClassifiedTabs from "../Navbars/ClassifiedTabs";
 
 const ClassifiedGrid = () => {
   const [count, setCount] = useState(0);
   const [rows, setRows] = useState([]);
   const [rowData, setRowData] = useState({});
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState({});
+  const [open, setOpen] = useState(false);
 
   const columns = [
     { field: "name", headerName: "Name", width: 150 },
-    { field: "prompt", headerName: "Prompt", width: 450 },
+    { field: "prompt", headerName: "Prompt", width: 150 },
     { field: "regex", headerName: "Regex", width: 150 },
     {
       field: "pramas",
@@ -26,7 +25,7 @@ const ClassifiedGrid = () => {
       width: 150,
       renderCell: (e) => e.row.groups.length,
     },
-    { field: "response", headerName: "Response", width: 450 },
+    { field: "response", headerName: "Response", width: 150 },
   ];
 
   useEffect(() => {
@@ -65,19 +64,14 @@ const ClassifiedGrid = () => {
     );
   };
 
-  const handleOnRowClick = (row, e) => {
+  const handleOnRowClick = (row) => {
     setRowData(row.row);
-    if (row.row.name === open.name) {
-      setOpen({ open: false, name: "" });
-    } else {
-      setOpen({ open: true, name: row.row.name });
-    }
-    setAnchorEl(e.currentTarget);
+    setOpen(true);
   };
 
   return (
-    <div className="w-11/12">
-      <ClassifiedPopper open={open} anchorEl={anchorEl} data={rowData} />
+    <div className={`${!open ? "w-11/12" : "h-full w-full"}`}>
+      {open && <ClassifiedTabs data={rowData} />}
       <DataGrid
         rows={rows}
         rowCount={count}
