@@ -5,7 +5,12 @@ const { Router } = require("express");
 const router = Router();
 
 router.post("/api/createPrompt", async (req, res) => {
-  const { hash } = req.body;
+  const {
+    hash,
+    prompt: givenPrompt,
+    response: givenResponse,
+    responseTime: givenResponseTime,
+  } = req.body;
   const isExist = await Prompt.findOne({ hash });
 
   if (isExist) {
@@ -15,6 +20,93 @@ router.post("/api/createPrompt", async (req, res) => {
     return res.send(
       "A prompt with this hash already exists, try updating instead!"
     );
+  }
+
+  let matchingSizeTemplates;
+  if (typeof givenPrompt === "string") {
+    matchingSizeTemplates = await Template.find({
+      regex: { $size: 1 },
+    });
+  } else {
+    matchingSizeTemplates = await Template.find({
+      regex: { $size: givenPrompt.length },
+    });
+  }
+
+  if (matchingSizeTemplates) {
+    for (const template of matchingSizeTemplates) {
+      const { regex, params } = template;
+      let regExp,
+        regExec,
+        groups = {},
+        groupsArray = [];
+
+      if (typeof givenPrompt === "string") {
+        regExp = new RegExp(regex[0]);
+        regExec = regExp.exec(givenPrompt);
+
+        if (regExec !== null) {
+          params[0].map((param, index) => {
+            groups[param] = regExec[index + 1];
+          });
+
+          template.groups.push(groups);
+          template.prompt.push(givenPrompt);
+          template.response.push(givenResponse);
+
+          template.statistics.responseTime =
+            template.statistics.responseTime + givenResponseTime;
+          template.statistics.totalTokens =
+            template.statistics.totalTokens +
+            givenResponse.data.usage.total_tokens;
+          if (template.statistics.maxResponseTime < givenResponseTime)
+            template.statistics.maxResponseTime = givenResponseTime;
+          template.statistics.numOfSessions =
+            template.statistics.numOfSessions + 1;
+
+          await template.save();
+
+          const prompt = new Prompt({ ...req.body, classified: true });
+          await prompt.save();
+          return res.send(prompt);
+        }
+      } else {
+        givenPrompt.map((pmt, index) => {
+          regExp = new RegExp(regex[index]);
+          regExec = regExp.exec(pmt.content);
+
+          if (regExec !== null) {
+            params[index].map((param, index) => {
+              groups[param] = regExec[index + 1];
+            });
+            groupsArray.push(groups);
+            groups = {};
+          }
+        });
+
+        if (givenPrompt.length === groupsArray.length) {
+          template.groups = [...template.groups, ...groupsArray];
+          template.prompt = [...template.prompt, ...givenPrompt];
+          template.response.push(givenResponse);
+
+          template.statistics.responseTime =
+            template.statistics.responseTime + givenResponseTime;
+          template.statistics.totalTokens =
+            template.statistics.totalTokens +
+            givenResponse.data.usage.total_tokens;
+          if (template.statistics.maxResponseTime < givenResponseTime)
+            template.statistics.maxResponseTime = givenResponseTime;
+          template.statistics.numOfSessions =
+            template.statistics.numOfSessions + 1;
+
+          await template.save();
+
+          const prompt = new Prompt({ ...req.body, classified: true });
+          await prompt.save();
+          return res.send(prompt);
+        }
+      }
+    }
   }
 
   const prompt = new Prompt({ ...req.body, classified: false });
@@ -60,8 +152,15 @@ router.post("/api/createTemplate", async (req, res) => {
     regex,
     groups: groupsList,
     params,
-    prompt: prompt.prompt,
-    response: prompt.response,
+    prompt:
+      typeof prompt.prompt === "string" ? [prompt.prompt] : [...prompt.prompt],
+    response: [prompt.response],
+    statistics: {
+      responseTime: prompt.responseTime,
+      totalTokens: prompt.response.data.usage.total_tokens,
+      maxResponseTime: prompt.responseTime,
+      numOfSessions: 1,
+    },
   });
 
   await templateModel.save();
