@@ -5,9 +5,9 @@ name: AWS Prompt CI
 
 on:
   push:
-    branches: ["aaa"]
+    branches: ["main"]
   pull_request:
-    branches: ["aaa"]
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -34,7 +34,9 @@ jobs:
             rm -rf prompts
             git clone https://github.com/blinq-io/prompts.git
             cd prompts/server/
-            sudo docker compose -f "docker-compose-dev.yml" up -d --build
+            sudo docker-compose -f "docker-compose-dev.yml" down
+            sudo docker-compose -f "docker-compose-dev.yml" up -d --build
 
             cd ../ui
-            sudo docker compose -f "docker-compose-dev.yml" up -d --build
+            sudo docker-compose -f "docker-compose-dev.yml" down
+            sudo docker-compose -f "docker-compose-dev.yml" up -d --build
