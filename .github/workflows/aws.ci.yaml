@@ -5,9 +5,9 @@ name: AWS Prompt CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["aaa"]
   pull_request:
-    branches: ["main"]
+    branches: ["aaa"]
 
 jobs:
   deploy:
