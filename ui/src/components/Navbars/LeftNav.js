@@ -1,10 +1,25 @@
+import { useSelector, useDispatch } from "react-redux";
+import { classifiedActions } from "../../redux/classifiedSlice";
 import ClassifiedGrid from "../Grids/ClassifiedGrid";
 import UnclassifiedGrid from "../Grids/UnclassifiedGrid";
 import NavTree from "./NavTree";
 
 import "../../styles/css/leftNav.css";
 
-const LeftNav = ({ handleOnUnclassified, handleOnClassified, classefied }) => {
+const LeftNav = () => {
+  const classified = useSelector((state) => state.classifiedSlice.isClassified);
+  const dispatch = useDispatch();
+
+  const handleOnUnclassified = async (e) => {
+    dispatch(classifiedActions.setClassification({ isClassified: false }));
+    dispatch(classifiedActions.setOpen({ isOpen: false }));
+  };
+
+  const handleOnClassified = async (e) => {
+    dispatch(classifiedActions.setClassification({ isClassified: true }));
+    dispatch(classifiedActions.setOpen({ isOpen: false }));
+  };
+
   return (
     <div className="flex">
       <div className="p-5 w-48 h-screen shadow-lg">
@@ -14,7 +29,7 @@ const LeftNav = ({ handleOnUnclassified, handleOnClassified, classefied }) => {
           handleOnUnclassified={handleOnUnclassified}
         />
       </div>
-      {!classefied ? <UnclassifiedGrid /> : <ClassifiedGrid />}
+      {!classified ? <UnclassifiedGrid /> : <ClassifiedGrid />}
     </div>
   );
 };

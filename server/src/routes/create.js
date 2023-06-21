@@ -34,6 +34,7 @@ router.post("/api/createPrompt", async (req, res) => {
   }
 
   if (matchingSizeTemplates) {
+    let match = false;
     for (const template of matchingSizeTemplates) {
       const { regex, params } = template;
       let regExp,
@@ -49,26 +50,11 @@ router.post("/api/createPrompt", async (req, res) => {
           params[0].map((param, index) => {
             groups[param] = regExec[index + 1];
           });
+          match = true;
 
           template.groups.push(groups);
           template.prompt.push(givenPrompt);
           template.response.push(givenResponse);
-
-          template.statistics.responseTime =
-            template.statistics.responseTime + givenResponseTime;
-          template.statistics.totalTokens =
-            template.statistics.totalTokens +
-            givenResponse.data.usage.total_tokens;
-          if (template.statistics.maxResponseTime < givenResponseTime)
-            template.statistics.maxResponseTime = givenResponseTime;
-          template.statistics.numOfSessions =
-            template.statistics.numOfSessions + 1;
-
-          await template.save();
-
-          const prompt = new Prompt({ ...req.body, classified: true });
-          await prompt.save();
-          return res.send(prompt);
         }
       } else {
         givenPrompt.map((pmt, index) => {
@@ -85,26 +71,26 @@ router.post("/api/createPrompt", async (req, res) => {
         });
 
         if (givenPrompt.length === groupsArray.length) {
+          match = true;
           template.groups = [...template.groups, ...groupsArray];
           template.prompt = [...template.prompt, ...givenPrompt];
           template.response.push(givenResponse);
-
-          template.statistics.responseTime =
-            template.statistics.responseTime + givenResponseTime;
-          template.statistics.totalTokens =
-            template.statistics.totalTokens +
-            givenResponse.data.usage.total_tokens;
-          if (template.statistics.maxResponseTime < givenResponseTime)
-            template.statistics.maxResponseTime = givenResponseTime;
-          template.statistics.numOfSessions =
-            template.statistics.numOfSessions + 1;
-
-          await template.save();
-
-          const prompt = new Prompt({ ...req.body, classified: true });
-          await prompt.save();
-          return res.send(prompt);
         }
+      }
+      if (match) {
+        template.statistics.responseTime += Number(givenResponseTime);
+        template.statistics.totalTokens +=
+          givenResponse.data.usage.total_tokens;
+        if (template.statistics.maxResponseTime < givenResponseTime)
+          template.statistics.maxResponseTime = Number(givenResponseTime);
+        template.statistics.numOfSessions += 1;
+
+        template.markModified("statistics");
+        await template.save();
+
+        const prompt = new Prompt({ ...req.body, classified: true });
+        await prompt.save();
+        return res.send(prompt);
       }
     }
   }
@@ -156,9 +142,9 @@ router.post("/api/createTemplate", async (req, res) => {
       typeof prompt.prompt === "string" ? [prompt.prompt] : [...prompt.prompt],
     response: [prompt.response],
     statistics: {
-      responseTime: prompt.responseTime,
+      responseTime: Number(prompt.responseTime),
       totalTokens: prompt.response.data.usage.total_tokens,
-      maxResponseTime: prompt.responseTime,
+      maxResponseTime: Number(prompt.responseTime),
       numOfSessions: 1,
     },
   });

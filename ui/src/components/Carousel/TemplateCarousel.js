@@ -47,10 +47,9 @@ const TemplateCarousel = ({ data, handleSetRegex, handleSetParams }) => {
 
       {data.map((prompt, index) => {
         return activeStep === index ? (
-          <div className="">
+          <div key={index}>
             <label>Parameters</label>
             <input
-              key={index}
               type="text"
               className="w-full rounded-lg border-black border bg-white mt-2 p-2  focus:bg-slate-100 focus:outline-none"
               onChange={(e) => {

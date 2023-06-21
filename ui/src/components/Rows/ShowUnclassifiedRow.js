@@ -11,6 +11,12 @@ const ShowUnclassifiedRow = ({ data, onRowOut }) => {
       <BackdropDiv onClick={onRowOut} />
       {!active ? (
         <ModelDiv background="linear-gradient(72.2deg, #ffffff 0%, #ffffff 100%);">
+          <button
+            onClick={() => setActive(true)}
+            className="font-semibold pb-3 pl-3 hover:text-slate-700 duration-100"
+          >
+            + Add classification
+          </button>
           <table className="border-collapse table-auto w-full text-sm">
             <tbody>
               <tr>
@@ -27,12 +33,6 @@ const ShowUnclassifiedRow = ({ data, onRowOut }) => {
               </tr>
             </tbody>
           </table>
-          <button
-            onClick={() => setActive(true)}
-            className="font-semibold pt-5 pl-3 hover:text-slate-700 duration-100"
-          >
-            Add classification
-          </button>
         </ModelDiv>
       ) : (
         <CreateTemplate promptId={data.id} prompt={data.prompt} />

@@ -1,18 +1,31 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { classifiedActions } from "../../redux/classifiedSlice";
 import axios from "axios";
 import ClassifiedTabs from "../Navbars/ClassifiedTabs";
 
 const ClassifiedGrid = () => {
   const [count, setCount] = useState(0);
   const [rows, setRows] = useState([]);
-  const [rowData, setRowData] = useState({});
-  const [open, setOpen] = useState(false);
+  const open = useSelector((state) => state.classifiedSlice.isOpen);
+  const rowData = useSelector((state) => state.classifiedSlice.rowData);
+  const dispatch = useDispatch();
 
   const columns = [
     { field: "name", headerName: "Name", width: 150 },
-    { field: "prompt", headerName: "Prompt", width: 150 },
-    { field: "regex", headerName: "Regex", width: 150 },
+    {
+      field: "prompt",
+      headerName: "Prompt",
+      width: 150,
+      renderCell: (e) => e.row.prompt.length,
+    },
+    {
+      field: "regex",
+      headerName: "Regex",
+      width: 150,
+      renderCell: (e) => e.row.regex.length,
+    },
     {
       field: "pramas",
       headerName: "Parameters",
@@ -25,7 +38,17 @@ const ClassifiedGrid = () => {
       width: 150,
       renderCell: (e) => e.row.groups.length,
     },
-    { field: "response", headerName: "Response", width: 150 },
+    {
+      field: "response",
+      headerName: "Response",
+      width: 150,
+      renderCell: (e) => e.row.response.length,
+    },
+    {
+      field: "updatedAt",
+      headerName: "Last updated",
+      width: 150,
+    },
   ];
 
   useEffect(() => {
@@ -48,8 +71,14 @@ const ClassifiedGrid = () => {
         return {
           id: item._id,
           name: item.name,
-          prompt: item.prompt,
-          regex: item.regex,
+          prompt: {
+            length: `Prompt count: ${item.prompt.length}`,
+            data: item.prompt,
+          },
+          regex: {
+            length: `Regex count: ${item.regex.length}`,
+            data: item.regex,
+          },
           params: {
             length: `Param count: ${item.params.length}`,
             data: item.params,
@@ -58,32 +87,40 @@ const ClassifiedGrid = () => {
             length: `Group count: ${Object.keys(item.groups).length}`,
             data: item.groups,
           },
-          response: item.response,
+          response: {
+            length: `Response count: ${item.response.length}`,
+            data: item.response,
+          },
+          updatedAt: item.updatedAt,
+          statistics: item.statistics,
         };
       })
     );
   };
 
   const handleOnRowClick = (row) => {
-    setRowData(row.row);
-    setOpen(true);
+    dispatch(classifiedActions.setOpen({ isOpen: true }));
+    dispatch(classifiedActions.setRowData({ rowData: row.row }));
   };
 
   return (
     <div className={`${!open ? "w-11/12" : "h-full w-full"}`}>
-      {open && <ClassifiedTabs data={rowData} />}
-      <DataGrid
-        rows={rows}
-        rowCount={count}
-        columns={columns}
-        paginationMode="server"
-        initialState={{
-          pagination: { paginationModel: { pageSize: 10 } },
-        }}
-        pageSizeOptions={[10]}
-        onPaginationModelChange={(e) => handleRows(e.page)}
-        onRowClick={handleOnRowClick}
-      />
+      {open ? (
+        <ClassifiedTabs data={rowData} />
+      ) : (
+        <DataGrid
+          rows={rows}
+          rowCount={count}
+          columns={columns}
+          paginationMode="server"
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+          pageSizeOptions={[10]}
+          onPaginationModelChange={(e) => handleRows(e.page)}
+          onRowClick={handleOnRowClick}
+        />
+      )}
     </div>
   );
 };
