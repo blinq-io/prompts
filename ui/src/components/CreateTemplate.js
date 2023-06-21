@@ -3,13 +3,44 @@ import axios from "axios";
 import { ModelDiv } from "../styles/components/popup.style";
 import "../styles/css/leftNav.css";
 import TemplateCarousel from "./Carousel/TemplateCarousel";
+import { Alert } from "@mui/material";
 
 const CreateTemplate = ({ promptId, prompt }) => {
   const [name, setName] = useState("");
-  const [regex, setRegex] = useState([]);
-  const [params, setParams] = useState([]);
+  const [regex, setRegex] = useState(new Array(prompt.length).fill(""));
+  const [params, setParams] = useState(new Array(prompt.length).fill(""));
+  const [error, setError] = useState("");
 
   const handleOnCreateClick = async () => {
+    if (name.trim() === "") {
+      setError("Must type a name!");
+      return;
+    }
+
+    if (regex.length !== prompt.length) {
+      setError("Must type a regex!");
+      return;
+    }
+
+    if (params.length !== prompt.length) {
+      setError("Must type the params!");
+      return;
+    }
+
+    for (const reg of regex) {
+      if (reg.trim() === "") {
+        setError("Must type a regex!");
+        return;
+      }
+    }
+
+    for (const param of params) {
+      if (param.trim() === "") {
+        setError("Must type the params!");
+        return;
+      }
+    }
+
     const parameters = params.map((param) => {
       return param.replace(/\s/g, "").split(",");
     });
@@ -54,6 +85,8 @@ const CreateTemplate = ({ promptId, prompt }) => {
             handleSetParams={handleSetParams}
           />
         </div>
+
+        {error !== "" && <Alert severity="error">{error}</Alert>}
 
         <button
           onClick={handleOnCreateClick}

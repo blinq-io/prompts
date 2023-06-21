@@ -49,14 +49,27 @@ router.get("/api/getClassifiedPage", async (req, res) => {
   const startPage = pageNum * MAX_PAGES_IN_PAGE;
 
   const template = await Template.find({})
+    .sort({ updatedAt: -1 })
     .skip(startPage)
     .limit(MAX_PAGES_IN_PAGE);
   return res.send(template);
 });
 
 router.get("/api/getAllTemplate", async (req, res) => {
-  const template = await Template.find({});
+  const template = await Template.find({}).sort({ updatedAt: -1 });
   res.send(template);
+});
+
+router.post("/api/getTemplateByName", async (req, res) => {
+  const name = req.body.name;
+  const template = await Template.findOne({ name });
+
+  if (!template) {
+    console.log("Template with that name doesn't exist!");
+    return res.send("Template with that name doesn't exist!");
+  }
+
+  return res.send(template);
 });
 
 exports.getRouter = router;

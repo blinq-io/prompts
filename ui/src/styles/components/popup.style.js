@@ -15,6 +15,8 @@ export const ModelDiv = styled.div`
     top: 20vh;
     left: 5%;
     width: 90%;
+    overflow-y: auto;
+    height: 29.2rem;
     background: ${(props) => props.background}
     padding: 16px;
     border-radius: 14px;
