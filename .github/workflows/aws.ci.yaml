@@ -26,6 +26,8 @@ jobs:
 
       - name: Connect to EC2 instance
         uses: appleboy/ssh-action@master
+        env:
+          REACT_APP_SERVER_URI: ${{ secrets.EC2_PUB_IP }}
         with:
           host: ${{ secrets.EC2_PUB_IP }}
           username: ec2-user
