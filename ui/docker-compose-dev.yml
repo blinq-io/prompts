@@ -7,12 +7,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - REACT_APP_SERVER_URI=http://server:4000
     ports:
       - "3000:3000"
     expose:
       - "3000"
     networks:
       - app-network
+      - server_app-network
   nginx:
     image: nginx
     volumes:

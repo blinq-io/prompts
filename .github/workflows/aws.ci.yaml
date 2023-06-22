@@ -33,10 +33,6 @@ jobs:
           script: |
             rm -rf prompts
             git clone https://github.com/blinq-io/prompts.git
-            cd prompts/server/
+            cd prompts/docker/
             sudo docker-compose -f "docker-compose-dev.yml" down
-            sudo docker-compose -f "docker-compose-dev.yml" up -d --build
-
-            cd ../ui
-            sudo docker-compose -f "docker-compose-dev.yml" down
-            sudo docker-compose -f "docker-compose-dev.yml" up -d --build
+            sudo docker compose -f "docker-compose.yml" up -d --build
