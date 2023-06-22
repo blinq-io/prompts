@@ -1,0 +1,62 @@
+version: "3.4"
+volumes:
+  my-db:
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+services:
+  db:
+    image: mongo
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    volumes:
+      - my-db:/data/db
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_URI=mongodb://db:27017/promptsvr
+    ports:
+      - "4000:4000"
+    expose:
+      - "4000"
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: ../ui
+      dockerfile: Dockerfile
+    environment:
+      - REACT_APP_SERVER_URI=http://localhost
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    networks:
+      app-network:
+        ipv4_address: 172.20.0.10
+    depends_on:
+      - server
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - app
