@@ -85,11 +85,15 @@ router.post("/api/createPrompt", async (req, res) => {
           template.statistics.maxResponseTime = Number(givenResponseTime);
         template.statistics.numOfSessions += 1;
 
-        template.markModified("statistics");
-        await template.save();
-
         const prompt = new Prompt({ ...req.body, classified: true });
         await prompt.save();
+
+        template.promptids.push(prompt._id);
+
+        template.markModified("statistics");
+        template.markModified("promptids");
+        await template.save();
+
         return res.send(prompt);
       }
     }
@@ -101,36 +105,92 @@ router.post("/api/createPrompt", async (req, res) => {
 });
 
 router.post("/api/createTemplate", async (req, res) => {
-  const { name, promptId, regex, params } = req.body;
+  const { name, regex, params } = req.body;
   const isExist = await Template.findOne({ name });
 
   if (isExist) {
-    console.log("Regex already exists, try updating instead!");
-    return res.send("Regex already exists, try updating instead!");
+    console.log("Template already exists, try updating instead!");
+    return res.send("Template already exists, try updating instead!");
   }
 
-  let groups = {};
-  let regExp;
-  const prompt = await Prompt.findOne({ _id: promptId });
-  const groupsList = [];
+  const prompt = await Prompt.find({
+    classified: false,
+    $expr: {
+      $eq: [{ $size: "$prompt" }, regex.length],
+    },
+  });
 
-  regex.map((reg, index) => {
-    regExp = new RegExp(reg);
-    if (typeof prompt.prompt === "string") {
-      regExp = regExp.exec(prompt.prompt);
-    } else {
-      for (let i = 0; i < prompt.prompt.length; i++) {
-        if (regExp.test(prompt.prompt[i].content)) {
-          regExp = regExp.exec(prompt.prompt[i].content);
-          break;
+  let groups = [];
+  let regExp;
+  const groupsList = [];
+  const promptids = [];
+  let flatPrompts = [];
+  let responses = [];
+  let statistics = {
+    responseTime: 0,
+    totalTokens: 0,
+    maxResponseTime: 0,
+    numOfSessions: 0,
+  };
+
+  prompt.map(async (prompt) => {
+    let flag = true,
+      broke = false;
+
+    regex.map((reg, index) => {
+      if (flag) {
+        regExp = new RegExp(reg);
+        if (typeof prompt.prompt === "string") {
+          if (regExp.test(prompt.prompt)) {
+            regExp = regExp.exec(prompt.prompt);
+          } else {
+            flag = false;
+          }
+        } else {
+          for (let i = 0; i < prompt.prompt.length; i++) {
+            if (regExp.test(prompt.prompt[i].content)) {
+              regExp = regExp.exec(prompt.prompt[i].content);
+              broke = true;
+              break;
+            }
+          }
+          if (!broke) {
+            flag = false;
+          } else {
+            broke = false;
+          }
         }
+        let group = {};
+        params[index].map((param, index) => {
+          group[param] = regExp[index + 1];
+        });
+        groups.push(group);
       }
-    }
-    params[index].map((param, index) => {
-      groups[param] = regExp[index + 1];
     });
-    groupsList.push(groups);
-    groups = {};
+    if (flag) {
+      groupsList.push(...groups);
+      groups = [];
+      promptids.push(prompt._id);
+      responses.push(prompt.response);
+
+      statistics.responseTime += Number(prompt.responseTime);
+      statistics.totalTokens += prompt.response.data.usage.total_tokens;
+      if (statistics.maxResponseTime < prompt.responseTime)
+        statistics.maxResponseTime = Number(prompt.responseTime);
+      statistics.numOfSessions += 1;
+
+      if (typeof prompt.prompt === "string") {
+        flatPrompts.push(prompt.prompt);
+      } else {
+        flatPrompts.push(...prompt.prompt);
+      }
+
+      prompt.classified = true;
+      await prompt.save();
+    } else {
+      groups = [];
+      flag = true;
+    }
   });
 
   const templateModel = new Template({
@@ -138,23 +198,20 @@ router.post("/api/createTemplate", async (req, res) => {
     regex,
     groups: groupsList,
     params,
-    prompt:
-      typeof prompt.prompt === "string" ? [prompt.prompt] : [...prompt.prompt],
-    response: [prompt.response],
-    statistics: {
-      responseTime: Number(prompt.responseTime),
-      totalTokens: prompt.response.data.usage.total_tokens,
-      maxResponseTime: Number(prompt.responseTime),
-      numOfSessions: 1,
-    },
+    prompt: flatPrompts,
+    promptids,
+    response: responses,
+    statistics: statistics,
   });
 
   await templateModel.save();
 
-  prompt.classified = true;
-  await prompt.save();
-
   res.send(templateModel);
+});
+
+router.post("/api/test", async (req, res) => {
+  await Prompt.updateMany({}, { classified: false });
+  res.send({});
 });
 
 exports.createRouter = router;
