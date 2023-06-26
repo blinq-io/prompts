@@ -22,6 +22,10 @@ const regexSchema = new mongoose.Schema(
       type: Array,
       required: true,
     },
+    promptids: {
+      type: Array,
+      required: true,
+    },
     response: {
       type: Array,
       required: true,

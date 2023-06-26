@@ -1,12 +1,18 @@
 import { useState } from "react";
+import axios from "axios";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
 import TableRow from "../../UI/TableRow";
 import randomBytes from "randombytes";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
 import "../../styles/css/tabs.css";
+import { Button } from "@mui/material";
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -42,6 +48,16 @@ const ClassifiedTabs = ({ data }) => {
     setValue(newValue);
   };
 
+  const handleOnDelete = async () => {
+    await axios.delete(
+      `${process.env.REACT_APP_SERVER_URI}/api/deleteTemplate`,
+      {
+        data: { id: data.id },
+      }
+    );
+    window.location.reload();
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
@@ -52,6 +68,30 @@ const ClassifiedTabs = ({ data }) => {
           <Tab label="Responses" />
         </Tabs>
       </Box>
+
+      <FormControl className="w-80">
+        <InputLabel className="mt-2 ml-2" id="select-label">
+          Versions
+        </InputLabel>
+        <Select
+          className="mt-2 mb-2 ml-2 inline-block"
+          labelId="select-label"
+          id="select"
+          label="Session"
+        >
+          <MenuItem value="all">All Versions</MenuItem>
+        </Select>
+      </FormControl>
+      <div className="py-5 ml-3 inline-block">
+        <Button
+          onClick={handleOnDelete}
+          color="error"
+          variant="outlined"
+          className="font-semibold"
+        >
+          Delete Template
+        </Button>
+      </div>
       <div className="overflow-y-auto tab-height border border-1">
         <TabPanel value={value} index={0}>
           <ShowClassifiedRow>

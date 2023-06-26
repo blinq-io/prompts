@@ -6,6 +6,7 @@ const cors = require("cors");
 const { getRouter } = require("./routes/get");
 const { updateRouter } = require("./routes/update");
 const { createRouter } = require("./routes/create");
+const { deleteRouter } = require("./routes/delete");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(getRouter);
 app.use(updateRouter);
 app.use(createRouter);
+app.use(deleteRouter);
 
 const start = async () => {
   await mongoose.connect(process.env.MONGO_URI);

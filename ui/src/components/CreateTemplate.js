@@ -47,7 +47,6 @@ const CreateTemplate = ({ promptId, prompt }) => {
 
     await axios.post(`${process.env.REACT_APP_SERVER_URI}/api/createTemplate`, {
       name,
-      promptId,
       regex,
       params: parameters,
     });
