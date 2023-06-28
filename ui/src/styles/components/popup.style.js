@@ -12,11 +12,11 @@ export const BackdropDiv = styled.div`
 
 export const ModelDiv = styled.div`
     position: fixed;
-    top: 20vh;
+    top: 15vh;
     left: 5%;
     width: 90%;
     overflow-y: auto;
-    height: 29.2rem;
+    height: ${(props) => props.height || "29.2rem"};
     background: ${(props) => props.background}
     padding: 16px;
     border-radius: 14px;

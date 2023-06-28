@@ -1,6 +1,6 @@
 const { Prompt } = require("../models/Prompt");
 const { Router } = require("express");
-const { Template } = require("../models/Template");
+const { Template, Version } = require("../models/Template");
 
 const router = Router();
 
@@ -48,11 +48,18 @@ router.get("/api/getClassifiedPage", async (req, res) => {
   const MAX_PAGES_IN_PAGE = 10;
   const startPage = pageNum * MAX_PAGES_IN_PAGE;
 
-  const template = await Template.find({})
+  const template = await Template.find({ duplicate: false })
     .sort({ updatedAt: -1 })
     .skip(startPage)
     .limit(MAX_PAGES_IN_PAGE);
   return res.send(template);
+});
+
+router.get("/api/getNonDuplicateTemplates", async (req, res) => {
+  const templates = await Template.find({ duplicate: false }).sort({
+    updatedAt: -1,
+  });
+  res.send(templates);
 });
 
 router.get("/api/getAllTemplate", async (req, res) => {
@@ -70,6 +77,23 @@ router.post("/api/getTemplateByName", async (req, res) => {
   }
 
   return res.send(template);
+});
+
+router.get("/api/getAllVersions", async (req, res) => {
+  const versions = await Version.find({});
+  res.send(versions);
+});
+
+router.post("/api/getVersionByName", async (req, res) => {
+  const name = req.body.name;
+  const version = await Version.findOne({ name }).populate("templates");
+
+  if (!version) {
+    console.log("Version doesn't exist!");
+    return res.send("Version doesn't exist!");
+  }
+
+  res.send(version);
 });
 
 exports.getRouter = router;

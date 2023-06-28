@@ -6,10 +6,14 @@ import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import { useTheme } from "@mui/material/styles";
 import { Box } from "@mui/material";
 
-const TemplateCarousel = ({ data, handleSetRegex, handleSetParams }) => {
+const TemplateCarousel = ({
+  data,
+  handleSetRegex,
+  handleSetParams,
+  paramSelector,
+}) => {
   const [activeStep, setActiveStep] = useState(0);
   const [text, setText] = useState([]);
-  const [paramText, setParamText] = useState([]);
   const maxSteps = data.length;
   const theme = useTheme();
 
@@ -53,12 +57,11 @@ const TemplateCarousel = ({ data, handleSetRegex, handleSetParams }) => {
               type="text"
               className="w-full rounded-lg border-black border bg-white mt-2 p-2  focus:bg-slate-100 focus:outline-none"
               onChange={(e) => {
-                let inputText = paramText;
+                let inputText = paramSelector;
                 inputText[index] = e.target.value;
-                setParamText(inputText);
                 handleSetParams(inputText);
               }}
-              defaultValue={paramText[index]}
+              defaultValue={paramSelector[index]}
             ></input>
           </div>
         ) : null;

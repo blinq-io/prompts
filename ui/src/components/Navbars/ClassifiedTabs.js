@@ -1,18 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
 import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
 import TableRow from "../../UI/TableRow";
 import randomBytes from "randombytes";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import {
+  Stack,
+  Select,
+  Button,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Box,
+  Tab,
+  Tabs,
+} from "@mui/material";
 
 import "../../styles/css/tabs.css";
-import { Button } from "@mui/material";
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -32,27 +35,63 @@ const TabPanel = (props) => {
 
 const ClassifiedTabs = ({ data }) => {
   const [value, setValue] = useState(0);
+  const [version, setVersion] = useState({
+    templates: [
+      {
+        ...data,
+        prompt: data.prompt.data,
+        regex: data.regex.data,
+        params: data.params.data,
+        groups: data.groups.data,
+        response: data.response.data,
+        ver: 0,
+      },
+    ],
+  });
+
+  const [selectorVal, setSelectorVal] = useState(0);
+  useEffect(() => {
+    const fetch = async () => {
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER_URI}/api/getVersionByName`,
+        {
+          name: data.name,
+        }
+      );
+      setVersion(res.data);
+      setSelectorVal(data.ver ? data.ver : 0);
+    };
+
+    fetch();
+  }, [data]);
+
   const avgMinutes = Math.floor(
-    data.statistics.responseTime / data.statistics.numOfSessions / 60000
+    version.templates[selectorVal].statistics.responseTime /
+      version.templates[selectorVal].statistics.numOfSessions /
+      60000
   );
   const avgSeconds = (
-    ((data.statistics.responseTime / data.statistics.numOfSessions) % 60000) /
+    ((version.templates[selectorVal].statistics.responseTime /
+      version.templates[selectorVal].statistics.numOfSessions) %
+      60000) /
     1000
   ).toFixed(2);
-  const maxMinutes = Math.floor(data.statistics.maxResponseTime / 60000);
-  const maxSeconds = ((data.statistics.maxResponseTime % 60000) / 1000).toFixed(
-    2
+  const maxMinutes = Math.floor(
+    version.templates[selectorVal].statistics.maxResponseTime / 60000
   );
+  const maxSeconds = (
+    (version.templates[selectorVal].statistics.maxResponseTime % 60000) /
+    1000
+  ).toFixed(2);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
   const handleOnDelete = async () => {
     await axios.delete(
       `${process.env.REACT_APP_SERVER_URI}/api/deleteTemplate`,
       {
-        data: { id: data.id },
+        data: { name: version.name },
       }
     );
     window.location.reload();
@@ -68,21 +107,26 @@ const ClassifiedTabs = ({ data }) => {
           <Tab label="Responses" />
         </Tabs>
       </Box>
-
-      <FormControl className="w-80">
-        <InputLabel className="mt-2 ml-2" id="select-label">
-          Versions
-        </InputLabel>
-        <Select
-          className="mt-2 mb-2 ml-2 inline-block"
-          labelId="select-label"
-          id="select"
-          label="Session"
-        >
-          <MenuItem value="all">All Versions</MenuItem>
-        </Select>
-      </FormControl>
-      <div className="py-5 ml-3 inline-block">
+      <Stack direction="row" spacing={2} className="my-3 ml-2">
+        <FormControl className="w-80">
+          <InputLabel id="select-label">Versions</InputLabel>
+          <Select
+            onChange={(e) => setSelectorVal(Number(e.target.value))}
+            value={selectorVal}
+            labelId="select-label"
+            id="select"
+            label="Session"
+          >
+            {version.templates.map((temp, index) => {
+              return (
+                <MenuItem
+                  key={randomBytes(16).toString("hex")}
+                  value={index}
+                >{`V${index + 1}`}</MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
         <Button
           onClick={handleOnDelete}
           color="error"
@@ -91,7 +135,8 @@ const ClassifiedTabs = ({ data }) => {
         >
           Delete Template
         </Button>
-      </div>
+      </Stack>
+
       <div className="overflow-y-auto tab-height border border-1">
         <TabPanel value={value} index={0}>
           <ShowClassifiedRow>
@@ -107,7 +152,9 @@ const ClassifiedTabs = ({ data }) => {
               </tr>
               <tr>
                 <TableRow text="Total tokens:" bold={true} />
-                <TableRow text={`${data.statistics.totalTokens}`} />
+                <TableRow
+                  text={`${version.templates[selectorVal].statistics.totalTokens}`}
+                />
               </tr>
               <tr>
                 <TableRow text="Max response time:" bold={true} />
@@ -119,7 +166,9 @@ const ClassifiedTabs = ({ data }) => {
               </tr>
               <tr>
                 <TableRow text="Number of sessions:" bold={true} />
-                <TableRow text={`${data.statistics.numOfSessions}`} />
+                <TableRow
+                  text={`${version.templates[selectorVal].statistics.numOfSessions}`}
+                />
               </tr>
             </tbody>
           </ShowClassifiedRow>
@@ -128,7 +177,7 @@ const ClassifiedTabs = ({ data }) => {
           <ShowClassifiedRow>
             <tbody>
               <TableRow text="Prompts" bold={true} />
-              {data.prompt.data.map((pmt, index) => {
+              {version.templates[selectorVal].prompt.map((pmt, index) => {
                 return (
                   <tr key={randomBytes(16).toString("hex")}>
                     <TableRow
@@ -147,7 +196,7 @@ const ClassifiedTabs = ({ data }) => {
           <ShowClassifiedRow>
             <tbody>
               <TableRow text="Regexs" bold={true} />
-              {data.regex.data.map((reg, index) => {
+              {version.templates[selectorVal].regex.map((reg, index) => {
                 return (
                   <tr key={randomBytes(16).toString("hex")}>
                     <TableRow
@@ -162,7 +211,7 @@ const ClassifiedTabs = ({ data }) => {
           <ShowClassifiedRow>
             <tbody>
               <TableRow text="Params" bold={true} />
-              {data.params.data.map((listparam, index) => {
+              {version.templates[selectorVal].params.map((listparam, index) => {
                 let paramArray = "[";
                 listparam.forEach((param) => {
                   paramArray += param + ", ";
@@ -183,7 +232,7 @@ const ClassifiedTabs = ({ data }) => {
           <ShowClassifiedRow>
             <tbody>
               <TableRow text="Groups" bold={true} />
-              {data.groups.data.map((group, index) => {
+              {version.templates[selectorVal].groups.map((group, index) => {
                 return (
                   <tr key={randomBytes(16).toString("hex")}>
                     <TableRow bold={true} text={`Prompt ${index + 1}:`} />
@@ -206,7 +255,7 @@ const ClassifiedTabs = ({ data }) => {
             <tbody>
               <TableRow bold={true} text="Responses"></TableRow>
 
-              {data.response.data.map((res, index) => {
+              {version.templates[selectorVal].response.map((res, index) => {
                 return (
                   <tr key={randomBytes(16).toString("hex")}>
                     <TableRow
