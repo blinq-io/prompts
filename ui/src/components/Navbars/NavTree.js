@@ -12,6 +12,8 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    /* eslint-disable react-hooks/exhaustive-deps */
+
     const fetch = async () => {
       const { data } = await axios.get(
         `${process.env.REACT_APP_SERVER_URI}/api/getClassifiedPage?page=0`

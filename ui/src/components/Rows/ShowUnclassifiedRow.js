@@ -1,19 +1,27 @@
 import { useState } from "react";
 import axios from "axios";
-import TableRow from "../../UI/TableRow";
+import TableColumn from "../../UI/TableColumn";
 import { BackdropDiv, ModelDiv } from "../../styles/components/popup.style";
 import CreateTemplate from "../popups/CreateTemplate";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Collapse } from "@mui/material";
 
 const ShowUnclassifiedRow = ({ data, onRowOut }) => {
   const [active, setActive] = useState(false);
-
+  const [expand, setExpand] = useState(
+    new Array(data.prompt.length).fill(false)
+  );
   const handleOnDelete = async () => {
     await axios.delete(`${process.env.REACT_APP_SERVER_URI}/api/deletePrompt`, {
       data: { id: data.id },
     });
 
     window.location.reload();
+  };
+
+  const handleOnExpand = (e, index) => {
+    const expandArr = expand;
+    expandArr[index] = !expandArr[index];
+    setExpand((prev) => [...expandArr]);
   };
 
   return (
@@ -42,16 +50,37 @@ const ShowUnclassifiedRow = ({ data, onRowOut }) => {
           <table className="border-collapse table-auto w-full text-sm">
             <tbody>
               <tr>
-                <TableRow text="Prompt" bold={true} />
-                <TableRow text={data.prompt} />
+                <TableColumn text="Prompt" bold={true} />
+                {data.prompt.map((prompt, index) => {
+                  return (
+                    <tr key={prompt + index}>
+                      <Collapse in={!expand[index]}>
+                        <TableColumn
+                          handleOnExpand={(e) => handleOnExpand(e, index)}
+                          pointer
+                          text={`Expand prompt ${index + 1}`}
+                          expanded={expand[index]}
+                        />
+                      </Collapse>
+                      <Collapse in={expand[index]}>
+                        <TableColumn
+                          handleOnExpand={(e) => handleOnExpand(e, index)}
+                          pointer
+                          text={prompt}
+                          expanded={expand[index]}
+                        />
+                      </Collapse>
+                    </tr>
+                  );
+                })}
               </tr>
               <tr>
-                <TableRow text="Response" bold={true} />
-                <TableRow text={data.response} />
+                <TableColumn text="Response" bold={true} />
+                <TableColumn text={data.response} />
               </tr>
               <tr>
-                <TableRow bold={true} text="Created At" />
-                <TableRow text={data.createdAt} />
+                <TableColumn bold={true} text="Created At" />
+                <TableColumn text={data.createdAt} />
               </tr>
             </tbody>
           </table>

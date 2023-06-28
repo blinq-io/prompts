@@ -6,7 +6,7 @@ import NavTree from "./NavTree";
 
 import "../../styles/css/leftNav.css";
 
-const LeftNav = () => {
+const Control = () => {
   const classified = useSelector((state) => state.classifiedSlice.isClassified);
   const dispatch = useDispatch();
 
@@ -34,4 +34,4 @@ const LeftNav = () => {
   );
 };
 
-export default LeftNav;
+export default Control;
