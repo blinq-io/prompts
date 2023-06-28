@@ -1,9 +1,9 @@
-import LeftNav from "./components/Navbars/LeftNav";
+import Control from "./components/Navbars/Control";
 
 const App = () => {
   return (
     <div>
-      <LeftNav />
+      <Control />
     </div>
   );
 };
