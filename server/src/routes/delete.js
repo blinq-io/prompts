@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const { Prompt } = require("../models/Prompt");
-const { Template } = require("../models/Template");
+const { Template, Version } = require("../models/Template");
 
 const router = Router();
 
@@ -19,24 +19,27 @@ router.delete("/api/deletePrompt", async (req, res) => {
 });
 
 router.delete("/api/deleteTemplate", async (req, res) => {
-  const _id = req.body.id;
-  const template = await Template.findOne({
-    _id,
+  const name = req.body.name;
+  const templates = await Template.find({
+    name,
   });
 
-  if (!template) {
+  if (!templates) {
     console.log("No template was found!");
     return res.send("No template was found!");
   }
 
-  await Prompt.updateMany(
-    { _id: { $in: template.promptids } },
-    { classified: false }
-  );
+  templates.map(async (template) => {
+    await Prompt.updateMany(
+      { _id: { $in: template.promptids } },
+      { classified: false }
+    );
+  });
 
-  await Template.deleteOne({ _id });
+  await Template.deleteMany({ name });
+  await Version.deleteOne({ name });
 
-  res.send(template);
+  res.send(templates);
 });
 
 exports.deleteRouter = router;

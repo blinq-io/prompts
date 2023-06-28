@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import TableRow from "../../UI/TableRow";
 import { BackdropDiv, ModelDiv } from "../../styles/components/popup.style";
-import CreateTemplate from "../CreateTemplate";
+import CreateTemplate from "../popups/CreateTemplate";
 import { Button, Stack } from "@mui/material";
 
 const ShowUnclassifiedRow = ({ data, onRowOut }) => {

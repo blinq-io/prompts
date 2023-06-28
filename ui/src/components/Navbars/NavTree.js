@@ -16,24 +16,45 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
       const { data } = await axios.get(
         `${process.env.REACT_APP_SERVER_URI}/api/getClassifiedPage?page=0`
       );
-      setGroups(
-        data.map((group, index) => {
+
+      const templates = await Promise.all(
+        data.map(async (group, index) => {
+          const { data: versionData } = await axios.post(
+            `${process.env.REACT_APP_SERVER_URI}/api/getVersionByName`,
+            {
+              name: group.name,
+            }
+          );
           return (
             <TreeItem
               key={index}
               nodeId={`${index + 3}`}
-              label={`${group.name}`}
+              label={group.name}
               onClick={handleOnTreeClick}
-            ></TreeItem>
+            >
+              {versionData.templates.map((tmp, verIndex) => {
+                return (
+                  <TreeItem
+                    onClick={(e) => {
+                      handleOnTreeClick(e, group.name);
+                    }}
+                    key={`tmp ${verIndex}`}
+                    nodeId={`${index * 10 + 10 + verIndex}`}
+                    label={`V${verIndex + 1}`}
+                  />
+                );
+              })}
+            </TreeItem>
           );
         })
       );
+      setGroups(templates);
     };
     fetch();
   }, []);
 
-  const handleOnTreeClick = async (e) => {
-    const name = e.target.innerHTML;
+  const handleOnTreeClick = async (e, id) => {
+    const name = !id ? e.target.innerHTML : id;
     const { data } = await axios.post(
       `${process.env.REACT_APP_SERVER_URI}/api/getTemplateByName`,
       {
@@ -60,10 +81,17 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
       data: data.response,
     };
 
-    dispatch(classifiedActions.setRowData({ rowData: data }));
+    const ver = !id ? 0 : Number(e.target.innerHTML.split("V")[1]) - 1;
+
+    dispatch(
+      classifiedActions.setRowData({
+        rowData: { ...data, ver },
+      })
+    );
     dispatch(classifiedActions.setOpen({ isOpen: true }));
     dispatch(classifiedActions.setClassification({ isClassified: true }));
   };
+
   return (
     <TreeView
       defaultCollapseIcon={<ExpandMoreIcon />}

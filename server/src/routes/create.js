@@ -106,11 +106,12 @@ router.post("/api/createPrompt", async (req, res) => {
 
 router.post("/api/createTemplate", async (req, res) => {
   const { name, regex, params } = req.body;
+  let duplicate = false;
+
   const isExist = await Template.findOne({ name });
 
   if (isExist) {
-    console.log("Template already exists, try updating instead!");
-    return res.send("Template already exists, try updating instead!");
+    duplicate = true;
   }
 
   const prompt = await Prompt.find({
@@ -202,9 +203,10 @@ router.post("/api/createTemplate", async (req, res) => {
     promptids,
     response: responses,
     statistics: statistics,
+    duplicate,
   });
 
-  await templateModel.save();
+  await templateModel.save({ _id: templateModel._id, name });
 
   res.send(templateModel);
 });
