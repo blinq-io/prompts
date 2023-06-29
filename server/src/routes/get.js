@@ -73,7 +73,10 @@ router.post("/api/getTemplateByName", async (req, res) => {
 
   if (!template) {
     console.log("Template with that name doesn't exist!");
-    return res.send("Template with that name doesn't exist!");
+    return res.send({
+      error: true,
+      message: "Template with that name doesn't exist!",
+    });
   }
 
   return res.send(template);
