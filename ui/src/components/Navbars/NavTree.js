@@ -33,6 +33,8 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
               nodeId={`${index + 3}`}
               label={group.name}
               onClick={handleOnTreeClick}
+              expandIcon={<ChevronRightIcon id={group.name} />}
+              collapseIcon={<ExpandMoreIcon id={group.name} />}
             >
               {versionData.templates.map((tmp, verIndex) => {
                 return (
@@ -56,13 +58,19 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
   }, []);
 
   const handleOnTreeClick = async (e, id) => {
-    const name = !id ? e.target.innerHTML : id;
+    const name =
+      e.target.tagName === "svg" ? e.target.id : !id ? e.target.innerHTML : id;
+
     const { data } = await axios.post(
       `${process.env.REACT_APP_SERVER_URI}/api/getTemplateByName`,
       {
         name,
       }
     );
+
+    if (data.error) {
+      return;
+    }
 
     data.prompt = {
       data: data.prompt,
