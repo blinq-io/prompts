@@ -9,7 +9,7 @@ const TableColumn = ({ text, bold, pointer, handleOnExpand, expanded }) => {
     >
       <p
         onClick={handleOnExpand}
-        className={`${pointer ? "cursor-pointer" : ""}`}
+        className={`whitespace-pre-wrap ${pointer ? "cursor-pointer" : ""}`}
       >
         {pointer ? !expanded ? <ExpandMore /> : <ExpandLess /> : null}
         {text}

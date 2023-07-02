@@ -1,6 +1,6 @@
-const ShowClassifiedRow = ({ children, scrollx, scrolly }) => {
+const ShowClassifiedRow = ({ children, className }) => {
   return (
-    <table className={`border-collapse table-auto w-full text-sm`}>
+    <table className={`border-collapse table-auto w-full text-sm ${className}`}>
       {children}
     </table>
   );

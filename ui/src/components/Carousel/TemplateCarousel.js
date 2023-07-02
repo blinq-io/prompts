@@ -36,13 +36,11 @@ const TemplateCarousel = ({
               let inputText = text;
               inputText[index] = e.target.value;
               setText(inputText);
-              handleSetRegex(inputText);
+              handleSetRegex(e.target.value, index);
             }}
             defaultValue={
               !text[index]
-                ? prompt.split(": ").length === 1
-                  ? prompt.slice(0, -1)
-                  : prompt.split(": ")[1].slice(0, -1)
+                ? prompt.slice(0, -1).split(": ").slice(1).join(": ")
                 : text[index]
             }
           ></textarea>
@@ -57,11 +55,11 @@ const TemplateCarousel = ({
               type="text"
               className="w-full rounded-lg border-black border bg-white mt-2 p-2  focus:bg-slate-100 focus:outline-none"
               onChange={(e) => {
-                let inputText = paramSelector;
-                inputText[index] = e.target.value;
-                handleSetParams(inputText);
+                handleSetParams(e.target.value, index);
               }}
-              defaultValue={paramSelector[index]}
+              defaultValue={
+                paramSelector[index] === "undefined" ? "" : paramSelector[index]
+              }
             ></input>
           </div>
         ) : null;

@@ -66,7 +66,7 @@ const ShowUnclassifiedRow = ({ data, onRowOut }) => {
                         <TableColumn
                           handleOnExpand={(e) => handleOnExpand(e, index)}
                           pointer
-                          text={prompt}
+                          text={`${prompt}`}
                           expanded={expand[index]}
                         />
                       </Collapse>

@@ -84,6 +84,11 @@ router.post("/api/createPrompt", async (req, res) => {
         if (template.statistics.maxResponseTime < givenResponseTime)
           template.statistics.maxResponseTime = Number(givenResponseTime);
         template.statistics.numOfSessions += 1;
+        template.statistics.maxTokens =
+          template.statistics.maxTokens <
+          prompt.response.data.usage.total_tokens
+            ? prompt.response.data.usage.total_tokens
+            : template.statistics.maxTokens;
 
         const prompt = new Prompt({ ...req.body, classified: true });
         await prompt.save();
@@ -129,6 +134,7 @@ router.post("/api/createTemplate", async (req, res) => {
   let responses = [];
   let statistics = {
     responseTime: 0,
+    maxTokens: 0,
     totalTokens: 0,
     maxResponseTime: 0,
     numOfSessions: 0,
@@ -179,6 +185,10 @@ router.post("/api/createTemplate", async (req, res) => {
       if (statistics.maxResponseTime < prompt.responseTime)
         statistics.maxResponseTime = Number(prompt.responseTime);
       statistics.numOfSessions += 1;
+      statistics.maxTokens =
+        statistics.maxTokens < prompt.response.data.usage.total_tokens
+          ? prompt.response.data.usage.total_tokens
+          : statistics.maxTokens;
 
       if (typeof prompt.prompt === "string") {
         flatPrompts.push(prompt.prompt);
