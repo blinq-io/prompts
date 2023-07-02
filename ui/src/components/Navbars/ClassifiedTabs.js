@@ -3,6 +3,9 @@ import axios from "axios";
 import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
 import TableColumn from "../../UI/TableColumn";
 import randomBytes from "randombytes";
+import { TreeView, TreeItem } from "@mui/lab";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import {
   Stack,
   Select,
@@ -13,10 +16,10 @@ import {
   Box,
   Tab,
   Tabs,
-  Collapse,
 } from "@mui/material";
 
 import "../../styles/css/tabs.css";
+import SessionGrid from "../Grids/SessionGrid";
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -50,16 +53,6 @@ const ClassifiedTabs = ({ data }) => {
     ],
   });
   const [selectorVal, setSelectorVal] = useState(0);
-  const [expand, setExpand] = useState(
-    new Array(version.templates.length).fill(
-      new Array(version.templates[0].prompt.length).fill(false)
-    )
-  );
-  const [expandGroups, setExpandGroups] = useState(
-    new Array(version.templates.length).fill(
-      new Array(version.templates[0].groups.length).fill(false)
-    )
-  );
 
   useEffect(() => {
     const fetch = async () => {
@@ -71,16 +64,6 @@ const ClassifiedTabs = ({ data }) => {
       );
       setVersion(res.data);
       setSelectorVal(data.ver ? data.ver : 0);
-      setExpand(
-        new Array(res.data.templates.length).fill(
-          new Array(res.data.templates[0].prompt.length).fill(false)
-        )
-      );
-      setExpandGroups(
-        new Array(res.data.templates.length).fill(
-          new Array(res.data.templates[0].groups.length).fill(false)
-        )
-      );
     };
 
     fetch();
@@ -104,18 +87,9 @@ const ClassifiedTabs = ({ data }) => {
     (version.templates[selectorVal].statistics.maxResponseTime % 60000) /
     1000
   ).toFixed(2);
-
-  const handleOnExpand = (e, index) => {
-    const expandArr = expand;
-    expandArr[selectorVal][index] = !expandArr[selectorVal][index];
-    setExpand((prev) => [...expandArr]);
-  };
-
-  const handleOnExpandGroups = (e, index) => {
-    const expandArr = expandGroups;
-    expandArr[selectorVal][index] = !expandArr[selectorVal][index];
-    setExpandGroups((prev) => [...expandArr]);
-  };
+  const avgTokens =
+    version.templates[selectorVal].statistics.totalTokens /
+    version.templates[selectorVal].statistics.numOfSessions;
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -130,14 +104,62 @@ const ClassifiedTabs = ({ data }) => {
     window.location.reload();
   };
 
+  const sessionPromptSplit = () => {
+    const treeSessions = [];
+    const numOfSessions =
+      version.templates[selectorVal].statistics.numOfSessions;
+    const pmt = version.templates[selectorVal].prompt;
+    const params = version.templates[selectorVal].params;
+    const response = version.templates[selectorVal].response;
+    const groups = version.templates[selectorVal].groups;
+    let index = 0;
+
+    for (
+      let i = numOfSessions;
+      i > (numOfSessions - 10 < 0 ? 0 : numOfSessions - 10);
+      i--
+    ) {
+      treeSessions.push(
+        <TreeItem
+          nodeId={randomBytes(16).toString("hex")}
+          label={`Session ${i}`}
+          sx={{ marginBottom: "0.50rem" }}
+        >
+          <ShowClassifiedRow>
+            <tr>
+              <TableColumn text="Response" bold />
+              <TableColumn
+                text={
+                  !response[i - 1].data.choices[0].message.content
+                    ? response[i - 1].data.choices[0].text
+                    : response[i - 1].data.choices[0].message.content
+                }
+              />
+            </tr>
+          </ShowClassifiedRow>
+          <SessionGrid
+            params={params}
+            promptsPerSession={pmt.length / numOfSessions}
+            groups={groups.slice(
+              pmt.length -
+                (index * pmt.length) / numOfSessions -
+                pmt.length / numOfSessions,
+              pmt.length - (index * pmt.length) / numOfSessions
+            )}
+          />
+        </TreeItem>
+      );
+      index++;
+    }
+    return treeSessions;
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs variant="fullWidth" value={value} onChange={handleChange}>
           <Tab label="Statistics" />
-          <Tab label="Prompts" />
-          <Tab label="Groups" />
-          <Tab label="Responses" />
+          <Tab label="Sessions" />
         </Tabs>
       </Box>
       <Stack direction="row" spacing={2} className="my-3 ml-2">
@@ -176,17 +198,21 @@ const ClassifiedTabs = ({ data }) => {
             <tbody>
               <TableColumn text="Statistics" bold={true} />
               <tr>
+                <TableColumn text="Average tokens:" bold={true} />
+                <TableColumn text={avgTokens} />
+              </tr>
+              <tr>
+                <TableColumn text="Max tokens:" bold={true} />
+                <TableColumn
+                  text={version.templates[selectorVal].statistics.maxTokens}
+                />
+              </tr>
+              <tr>
                 <TableColumn text="Average response time:" bold={true} />
                 <TableColumn
                   text={`${
                     avgMinutes > 0 ? avgMinutes + " minutes and " : ""
                   }${avgSeconds} seconds`}
-                />
-              </tr>
-              <tr>
-                <TableColumn text="Total tokens:" bold={true} />
-                <TableColumn
-                  text={`${version.templates[selectorVal].statistics.totalTokens}`}
                 />
               </tr>
               <tr>
@@ -209,127 +235,49 @@ const ClassifiedTabs = ({ data }) => {
         <TabPanel value={value} index={1}>
           <ShowClassifiedRow>
             <tbody>
-              <TableColumn text="Prompts" bold={true} />
-              {version.templates[selectorVal].prompt.map((pmt, index) => {
-                return (
-                  <tr key={randomBytes(16).toString("hex")}>
-                    <Collapse in={!expand[selectorVal][index]}>
-                      <TableColumn
-                        handleOnExpand={(e) => handleOnExpand(e, index)}
-                        pointer
-                        text={`Expand prompt ${index + 1}`}
-                        expanded={expand[selectorVal][index]}
-                      />
-                    </Collapse>
-                    <Collapse in={expand[selectorVal][index]}>
-                      <TableColumn
-                        handleOnExpand={(e) => handleOnExpand(e, index)}
-                        pointer
-                        text={`${index + 1}. ${pmt.role.toUpperCase()}: ${
-                          pmt.content
-                        }`}
-                        expanded={expand[selectorVal][index]}
-                      />
-                    </Collapse>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </ShowClassifiedRow>
-        </TabPanel>
-        <TabPanel value={value} index={2}>
-          <ShowClassifiedRow>
-            <tbody>
-              <TableColumn text="Regexs" bold={true} />
-              {version.templates[selectorVal].regex.map((reg, index) => {
-                return (
-                  <tr key={randomBytes(16).toString("hex")}>
-                    <TableColumn
-                      key={randomBytes(16).toString("hex")}
-                      text={`${index + 1}. ${reg}`}
-                    />
-                  </tr>
-                );
-              })}
-            </tbody>
-          </ShowClassifiedRow>
-          <ShowClassifiedRow>
-            <tbody>
-              <TableColumn text="Params" bold={true} />
-              {version.templates[selectorVal].params.map((listparam, index) => {
-                let paramArray = "[";
-                listparam.forEach((param) => {
-                  paramArray += param + ", ";
-                });
-                paramArray = paramArray.slice(0, -2);
-                paramArray += "]";
-                return (
-                  <tr key={randomBytes(16).toString("hex")}>
-                    <TableColumn
-                      key={randomBytes(16).toString("hex")}
-                      text={`${index + 1}. ${paramArray}`}
-                    />
-                  </tr>
-                );
-              })}
-            </tbody>
-          </ShowClassifiedRow>
-          <ShowClassifiedRow>
-            <tbody>
-              <TableColumn text="Groups" bold={true} />
-              {version.templates[selectorVal].groups.map((group, index) => {
-                return (
-                  <tr key={randomBytes(16).toString("hex")}>
-                    <Collapse in={expandGroups[selectorVal][index]}>
-                      <TableColumn
-                        bold={true}
-                        text={`Prompt ${index + 1}:`}
-                        pointer
-                        expanded={expandGroups[selectorVal][index]}
-                        handleOnExpand={(e) => handleOnExpandGroups(e, index)}
-                      />
-
-                      {Object.keys(group).map((key) => {
-                        return (
+              <tr>
+                <TreeView
+                  defaultCollapseIcon={<ExpandMoreIcon />}
+                  defaultExpandIcon={<ChevronRightIcon />}
+                  sx={{ marginTop: "0.75rem" }}
+                >
+                  <ShowClassifiedRow>
+                    <TableColumn text="Regexs" bold={true} />
+                    {version.templates[selectorVal].regex.map((reg, index) => {
+                      return (
+                        <tr key={randomBytes(16).toString("hex")}>
                           <TableColumn
                             key={randomBytes(16).toString("hex")}
-                            text={`${key.toUpperCase()}: ${group[key]}`}
+                            text={`${index + 1}. ${reg}`}
                           />
+                        </tr>
+                      );
+                    })}
+                  </ShowClassifiedRow>
+                  <ShowClassifiedRow className="mb-3">
+                    <TableColumn text="Params" bold={true} />
+                    {version.templates[selectorVal].params.map(
+                      (listparam, index) => {
+                        let paramArray = "[";
+                        listparam.forEach((param) => {
+                          paramArray += param + ", ";
+                        });
+                        paramArray = paramArray.slice(0, -2);
+                        paramArray += "]";
+                        return (
+                          <tr key={randomBytes(16).toString("hex")}>
+                            <TableColumn
+                              key={randomBytes(16).toString("hex")}
+                              text={`${index + 1}. ${paramArray}`}
+                            />
+                          </tr>
                         );
-                      })}
-                    </Collapse>
-                    <Collapse in={!expandGroups[selectorVal][index]}>
-                      <TableColumn
-                        bold={true}
-                        text={`Prompt ${index + 1}: Click to extend`}
-                        pointer
-                        expanded={expandGroups[selectorVal][index]}
-                        handleOnExpand={(e) => handleOnExpandGroups(e, index)}
-                      />
-                    </Collapse>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </ShowClassifiedRow>
-        </TabPanel>
-        <TabPanel value={value} index={3}>
-          <ShowClassifiedRow>
-            <tbody>
-              <TableColumn bold={true} text="Responses"></TableColumn>
-
-              {version.templates[selectorVal].response.map((res, index) => {
-                return (
-                  <tr key={randomBytes(16).toString("hex")}>
-                    <TableColumn
-                      key={randomBytes(16).toString("hex")}
-                      text={`${index + 1}. ${
-                        res.data.choices[0].message.content
-                      }`}
-                    />
-                  </tr>
-                );
-              })}
+                      }
+                    )}
+                  </ShowClassifiedRow>
+                  {sessionPromptSplit()}
+                </TreeView>
+              </tr>
             </tbody>
           </ShowClassifiedRow>
         </TabPanel>

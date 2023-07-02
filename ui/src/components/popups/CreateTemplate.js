@@ -15,8 +15,10 @@ import {
 
 const CreateTemplate = ({ prompt }) => {
   const [name, setName] = useState("");
-  const [regex, setRegex] = useState(new Array(prompt.length).fill(""));
-  const [params, setParams] = useState(new Array(prompt.length).fill(""));
+  const [regex, setRegex] = useState(new Array(prompt.length).fill("(.*)"));
+  const [params, setParams] = useState(
+    new Array(prompt.length).fill("undefined")
+  );
   const [error, setError] = useState("");
   const [isNew, setIsNew] = useState("new");
   const [selectors, setSelectors] = useState([]);
@@ -39,26 +41,15 @@ const CreateTemplate = ({ prompt }) => {
       return;
     }
 
-    if (regex.length !== prompt.length) {
-      setError("Must type a regex!");
-      return;
-    }
-
-    if (params.length !== prompt.length) {
-      setError("Must type the params!");
-      return;
-    }
-
-    for (const reg of regex) {
-      if (reg.trim() === "") {
-        setError("Must type a regex!");
+    for (let i = 0; i < regex.length; i++) {
+      if (regex[i] !== "(.*)" && params[i] === "undefined") {
+        setError("Must type parameters for a regex!");
         return;
       }
-    }
-
-    for (const param of params) {
-      if (param.trim() === "") {
-        setError("Must type the params!");
+      if (regex[i] === "(.*)" && params[i] !== "undefined") {
+        setError(
+          "Must type a regex when adding parameters or remove the paramaters all together!"
+        );
         return;
       }
     }
@@ -76,12 +67,18 @@ const CreateTemplate = ({ prompt }) => {
     window.location.replace("/");
   };
 
-  const handleSetRegex = (regexes) => {
-    setRegex(regexes);
+  const handleSetRegex = (regex, index) => {
+    setRegex((prev) => {
+      prev[index] = regex;
+      return prev;
+    });
   };
 
-  const handleSetParams = (param) => {
-    setParams(param);
+  const handleSetParams = (param, index) => {
+    setParams((prev) => {
+      prev[index] = param;
+      return prev;
+    });
   };
 
   const handleToggleChange = (e, value) => {
