@@ -9,6 +9,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
   const [groups, setGroups] = useState([]);
+  // eslint-disable-next-line
+  const [templateCache, setTemplateCache] = useState({});
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -61,13 +63,29 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
   const handleOnTreeClick = async (e, id) => {
     const name =
       e.target.tagName === "svg" ? e.target.id : !id ? e.target.innerHTML : id;
+    let data,
+      cache = {};
+    setTemplateCache((prev) => {
+      cache = prev;
+      return prev;
+    });
+    if (!cache[name]) {
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER_URI}/api/getTemplateByName`,
+        {
+          name,
+        }
+      );
+      data = res.data;
 
-    const { data } = await axios.post(
-      `${process.env.REACT_APP_SERVER_URI}/api/getTemplateByName`,
-      {
-        name,
-      }
-    );
+      setTemplateCache((prev) => {
+        let newTemp = { ...prev };
+        newTemp[name] = data;
+        return newTemp;
+      });
+    } else {
+      data = cache[name];
+    }
 
     if (data.error) {
       return;
