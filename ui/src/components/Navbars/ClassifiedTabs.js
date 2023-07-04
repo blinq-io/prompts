@@ -124,6 +124,7 @@ const ClassifiedTabs = ({ data }) => {
           nodeId={randomBytes(16).toString("hex")}
           label={`Session ${i}`}
           sx={{ marginBottom: "0.50rem" }}
+          key={randomBytes(16).toString("hex")}
         >
           <ShowClassifiedRow>
             <tr>
