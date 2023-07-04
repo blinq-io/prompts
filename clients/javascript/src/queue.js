@@ -42,7 +42,6 @@ exports.Queue = class Queue {
             PromptProxy.queue.dequeue();
           }
         }
-        console.log("Can't access server!");
       }
     }, 2000);
   }
