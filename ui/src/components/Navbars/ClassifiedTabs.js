@@ -241,39 +241,45 @@ const ClassifiedTabs = ({ data }) => {
                   defaultExpandIcon={<ChevronRightIcon />}
                   sx={{ marginTop: "0.75rem" }}
                 >
-                  <ShowClassifiedRow>
-                    <TableColumn text="Regexs" bold={true} />
-                    {version.templates[selectorVal].regex.map((reg, index) => {
-                      return (
-                        <tr key={randomBytes(16).toString("hex")}>
-                          <TableColumn
-                            key={randomBytes(16).toString("hex")}
-                            text={`${index + 1}. ${reg}`}
-                          />
-                        </tr>
-                      );
-                    })}
-                  </ShowClassifiedRow>
                   <ShowClassifiedRow className="mb-3">
-                    <TableColumn text="Params" bold={true} />
-                    {version.templates[selectorVal].params.map(
-                      (listparam, index) => {
-                        let paramArray = "[";
-                        listparam.forEach((param) => {
-                          paramArray += param + ", ";
-                        });
-                        paramArray = paramArray.slice(0, -2);
-                        paramArray += "]";
-                        return (
-                          <tr key={randomBytes(16).toString("hex")}>
-                            <TableColumn
-                              key={randomBytes(16).toString("hex")}
-                              text={`${index + 1}. ${paramArray}`}
-                            />
-                          </tr>
-                        );
-                      }
-                    )}
+                    <tr>
+                      <TableColumn text="Regexs" bold={true} />
+                      {version.templates[selectorVal].regex.map(
+                        (reg, index) => {
+                          return (
+                            <tr key={randomBytes(16).toString("hex")}>
+                              <TableColumn
+                                key={randomBytes(16).toString("hex")}
+                                text={`${index + 1}. ${reg}`}
+                              />
+                            </tr>
+                          );
+                        }
+                      )}
+                    </tr>
+                    <tr>
+                      <TableColumn text="Params" bold={true} />
+                      {version.templates[selectorVal].params.map(
+                        (listparam, index) => {
+                          let paramArray = "[";
+                          listparam.forEach((param) => {
+                            paramArray += param + ", ";
+                          });
+                          paramArray = paramArray.slice(0, -2);
+                          paramArray += "]";
+                          return (
+                            <tr key={randomBytes(16).toString("hex")}>
+                              <TableColumn
+                                key={randomBytes(16).toString("hex")}
+                                text={`${index + 1}. ${
+                                  listparam.length === 0 ? "[]" : paramArray
+                                }`}
+                              />
+                            </tr>
+                          );
+                        }
+                      )}
+                    </tr>
                   </ShowClassifiedRow>
                   {sessionPromptSplit()}
                 </TreeView>

@@ -35,6 +35,7 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
               onClick={handleOnTreeClick}
               expandIcon={<ChevronRightIcon id={group.name} />}
               collapseIcon={<ExpandMoreIcon id={group.name} />}
+              className="break-all"
             >
               {versionData.templates.map((tmp, verIndex) => {
                 return (

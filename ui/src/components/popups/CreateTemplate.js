@@ -15,9 +15,12 @@ import {
 
 const CreateTemplate = ({ prompt }) => {
   const [name, setName] = useState("");
-  const [regex, setRegex] = useState(new Array(prompt.length).fill("(.*)"));
+  const [regex, setRegex] = useState(
+    prompt.map((prompt) => prompt.slice(0, -1).split(": ").slice(1).join(": "))
+  );
+  const [copyRegex] = useState([...regex]);
   const [params, setParams] = useState(
-    new Array(prompt.length).fill("undefined")
+    Array.from({ length: prompt.length }, () => [])
   );
   const [error, setError] = useState("");
   const [isNew, setIsNew] = useState("new");
@@ -42,11 +45,11 @@ const CreateTemplate = ({ prompt }) => {
     }
 
     for (let i = 0; i < regex.length; i++) {
-      if (regex[i] !== "(.*)" && params[i] === "undefined") {
+      if (regex[i] !== copyRegex[i] && params[i].length === 0) {
         setError("Must type parameters for a regex!");
         return;
       }
-      if (regex[i] === "(.*)" && params[i] !== "undefined") {
+      if (regex[i] === copyRegex[i] && params[i].length > 0) {
         setError(
           "Must type a regex when adding parameters or remove the paramaters all together!"
         );
@@ -55,7 +58,9 @@ const CreateTemplate = ({ prompt }) => {
     }
 
     const parameters = params.map((param) => {
-      return param.replace(/\s/g, "").split(",");
+      return typeof param === "string"
+        ? param.replace(/\s/g, "").split(",")
+        : [];
     });
 
     await axios.post(`${process.env.REACT_APP_SERVER_URI}/api/createTemplate`, {
