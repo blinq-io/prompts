@@ -84,34 +84,33 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
         newTemp[name] = data;
         return newTemp;
       });
+
+      data.prompt = {
+        data: data.prompt,
+      };
+
+      data.regex = {
+        data: data.regex,
+      };
+
+      data.groups = {
+        data: data.groups,
+      };
+      data.params = {
+        data: data.params,
+      };
+
+      data.response = {
+        data: data.response,
+      };
     } else {
       data = cache[name];
     }
 
     if (data.error) {
       dispatch(classifiedActions.setIsLoading());
-
       return;
     }
-
-    data.prompt = {
-      data: data.prompt,
-    };
-
-    data.regex = {
-      data: data.regex,
-    };
-
-    data.groups = {
-      data: data.groups,
-    };
-    data.params = {
-      data: data.params,
-    };
-
-    data.response = {
-      data: data.response,
-    };
 
     const ver = !id ? 0 : Number(e.target.innerHTML.split("V")[1]) - 1;
 
