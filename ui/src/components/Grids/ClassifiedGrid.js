@@ -99,10 +99,10 @@ const ClassifiedGrid = () => {
   };
 
   const handleOnRowClick = (row) => {
-    dispatch(classifiedActions.setIsLoading());
+    dispatch(classifiedActions.setIsLoading(true));
     dispatch(classifiedActions.setOpen({ isOpen: true }));
     dispatch(classifiedActions.setRowData({ rowData: row.row }));
-    dispatch(classifiedActions.setIsLoading());
+    dispatch(classifiedActions.setIsLoading(false));
   };
 
   return (
