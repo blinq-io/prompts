@@ -173,7 +173,7 @@ const ClassifiedTabs = ({ data }) => {
           </div>
         </div>
       ) : (
-        <div>
+        <>
           <Stack direction="row" spacing={2} className="my-3 ml-2">
             <FormControl className="w-80">
               <InputLabel id="select-label">Versions</InputLabel>
@@ -300,7 +300,7 @@ const ClassifiedTabs = ({ data }) => {
               </ShowClassifiedRow>
             </TabPanel>
           </div>
-        </div>
+        </>
       )}
     </Box>
   );
