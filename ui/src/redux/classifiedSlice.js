@@ -18,8 +18,8 @@ const classifiedSlice = createSlice({
     setClassification(state, action) {
       state.isClassified = action.payload.isClassified;
     },
-    setIsLoading(state) {
-      state.isLoading = !state.isLoading;
+    setIsLoading(state, action) {
+      state.isLoading = action.payload;
     },
   },
 });

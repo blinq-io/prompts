@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { classifiedActions } from "../../redux/classifiedSlice";
+import { useSelector, useDispatch } from "react-redux";
 import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
 import TableColumn from "../../UI/TableColumn";
 import randomBytes from "randombytes";
@@ -40,7 +41,9 @@ const TabPanel = (props) => {
 };
 
 const ClassifiedTabs = ({ data }) => {
+  const dispatch = useDispatch();
   const [value, setValue] = useState(0);
+  const [sessions, setSessions] = useState([]);
   const [version, setVersion] = useState({
     templates: [
       {
@@ -72,42 +75,8 @@ const ClassifiedTabs = ({ data }) => {
     fetch();
   }, [data]);
 
-  const avgMinutes = Math.floor(
-    version.templates[selectorVal].statistics.responseTime /
-      version.templates[selectorVal].statistics.numOfSessions /
-      60000
-  );
-  const avgSeconds = (
-    ((version.templates[selectorVal].statistics.responseTime /
-      version.templates[selectorVal].statistics.numOfSessions) %
-      60000) /
-    1000
-  ).toFixed(2);
-  const maxMinutes = Math.floor(
-    version.templates[selectorVal].statistics.maxResponseTime / 60000
-  );
-  const maxSeconds = (
-    (version.templates[selectorVal].statistics.maxResponseTime % 60000) /
-    1000
-  ).toFixed(2);
-  const avgTokens =
-    version.templates[selectorVal].statistics.totalTokens /
-    version.templates[selectorVal].statistics.numOfSessions;
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-  const handleOnDelete = async () => {
-    await axios.delete(
-      `${process.env.REACT_APP_SERVER_URI}/api/deleteTemplate`,
-      {
-        data: { name: version.name },
-      }
-    );
-    window.location.reload();
-  };
-
-  const sessionPromptSplit = () => {
+  useEffect(() => {
+    dispatch(classifiedActions.setIsLoading(true));
     const treeSessions = [];
     const numOfSessions =
       version.templates[selectorVal].statistics.numOfSessions;
@@ -155,7 +124,43 @@ const ClassifiedTabs = ({ data }) => {
       );
       index++;
     }
-    return treeSessions;
+    setSessions(treeSessions);
+    dispatch(classifiedActions.setIsLoading(false));
+  }, [dispatch, selectorVal, version.templates]);
+
+  const avgMinutes = Math.floor(
+    version.templates[selectorVal].statistics.responseTime /
+      version.templates[selectorVal].statistics.numOfSessions /
+      60000
+  );
+  const avgSeconds = (
+    ((version.templates[selectorVal].statistics.responseTime /
+      version.templates[selectorVal].statistics.numOfSessions) %
+      60000) /
+    1000
+  ).toFixed(2);
+  const maxMinutes = Math.floor(
+    version.templates[selectorVal].statistics.maxResponseTime / 60000
+  );
+  const maxSeconds = (
+    (version.templates[selectorVal].statistics.maxResponseTime % 60000) /
+    1000
+  ).toFixed(2);
+  const avgTokens =
+    version.templates[selectorVal].statistics.totalTokens /
+    version.templates[selectorVal].statistics.numOfSessions;
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+  const handleOnDelete = async () => {
+    await axios.delete(
+      `${process.env.REACT_APP_SERVER_URI}/api/deleteTemplate`,
+      {
+        data: { name: version.name },
+      }
+    );
+    window.location.reload();
   };
 
   return (
@@ -293,7 +298,7 @@ const ClassifiedTabs = ({ data }) => {
                           )}
                         </tr>
                       </ShowClassifiedRow>
-                      {sessionPromptSplit()}
+                      {sessions}
                     </TreeView>
                   </tr>
                 </tbody>
