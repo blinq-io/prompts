@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import axios from "axios";
 import { classifiedActions } from "../../redux/classifiedSlice";
 import { useSelector, useDispatch } from "react-redux";
@@ -125,8 +125,11 @@ const ClassifiedTabs = ({ data }) => {
       index++;
     }
     setSessions(treeSessions);
-    dispatch(classifiedActions.setIsLoading(false));
   }, [dispatch, selectorVal, version.templates]);
+
+  useLayoutEffect(() => {
+    dispatch(classifiedActions.setIsLoading(false));
+  });
 
   const avgMinutes = Math.floor(
     version.templates[selectorVal].statistics.responseTime /
