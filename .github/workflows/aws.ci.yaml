@@ -33,7 +33,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            rm -rf prompts
+            sudo rm -rf prompts
             git clone https://github.com/blinq-io/prompts.git
             cd prompts/docker/
             sudo docker-compose -f "docker-compose.yml" down
