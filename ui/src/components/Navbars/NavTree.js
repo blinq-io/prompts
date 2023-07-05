@@ -61,6 +61,7 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
   }, []);
 
   const handleOnTreeClick = async (e, id) => {
+    dispatch(classifiedActions.setIsLoading());
     const name =
       e.target.tagName === "svg" ? e.target.id : !id ? e.target.innerHTML : id;
     let data,
@@ -88,6 +89,8 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
     }
 
     if (data.error) {
+      dispatch(classifiedActions.setIsLoading());
+
       return;
     }
 
@@ -119,6 +122,7 @@ const NavTree = ({ handleOnUnclassified, handleOnClassified }) => {
     );
     dispatch(classifiedActions.setOpen({ isOpen: true }));
     dispatch(classifiedActions.setClassification({ isClassified: true }));
+    dispatch(classifiedActions.setIsLoading());
   };
 
   return (

@@ -6,6 +6,7 @@ const classifiedSlice = createSlice({
     rowData: {},
     isOpen: false,
     isClassified: false,
+    isLoading: false,
   },
   reducers: {
     setRowData(state, action) {
@@ -16,6 +17,9 @@ const classifiedSlice = createSlice({
     },
     setClassification(state, action) {
       state.isClassified = action.payload.isClassified;
+    },
+    setIsLoading(state) {
+      state.isLoading = !state.isLoading;
     },
   },
 });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import ShowClassifiedRow from "../Rows/ShowClassifiedRow";
 import TableColumn from "../../UI/TableColumn";
 import randomBytes from "randombytes";
@@ -16,6 +17,7 @@ import {
   Box,
   Tab,
   Tabs,
+  CircularProgress,
 } from "@mui/material";
 
 import "../../styles/css/tabs.css";
@@ -53,6 +55,7 @@ const ClassifiedTabs = ({ data }) => {
     ],
   });
   const [selectorVal, setSelectorVal] = useState(0);
+  const isLoading = useSelector((state) => state.classifiedSlice.isLoading);
 
   useEffect(() => {
     const fetch = async () => {
@@ -163,132 +166,142 @@ const ClassifiedTabs = ({ data }) => {
           <Tab label="Sessions" />
         </Tabs>
       </Box>
-      <Stack direction="row" spacing={2} className="my-3 ml-2">
-        <FormControl className="w-80">
-          <InputLabel id="select-label">Versions</InputLabel>
-          <Select
-            onChange={(e) => setSelectorVal(Number(e.target.value))}
-            value={selectorVal}
-            labelId="select-label"
-            id="select"
-            label="Session"
-          >
-            {version.templates.map((temp, index) => {
-              return (
-                <MenuItem
-                  key={randomBytes(16).toString("hex")}
-                  value={index}
-                >{`V${index + 1}`}</MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
-        <Button
-          onClick={handleOnDelete}
-          color="error"
-          variant="outlined"
-          className="font-semibold"
-        >
-          Delete Template
-        </Button>
-      </Stack>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <CircularProgress />
+          </div>
+        </div>
+      ) : (
+        <>
+          <Stack direction="row" spacing={2} className="my-3 ml-2">
+            <FormControl className="w-80">
+              <InputLabel id="select-label">Versions</InputLabel>
+              <Select
+                onChange={(e) => setSelectorVal(Number(e.target.value))}
+                value={selectorVal}
+                labelId="select-label"
+                id="select"
+                label="Session"
+              >
+                {version.templates.map((temp, index) => {
+                  return (
+                    <MenuItem
+                      key={randomBytes(16).toString("hex")}
+                      value={index}
+                    >{`V${index + 1}`}</MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+            <Button
+              onClick={handleOnDelete}
+              color="error"
+              variant="outlined"
+              className="font-semibold"
+            >
+              Delete Template
+            </Button>
+          </Stack>
 
-      <div className="overflow-y-auto tab-height border border-1">
-        <TabPanel value={value} index={0}>
-          <ShowClassifiedRow>
-            <tbody>
-              <TableColumn text="Statistics" bold={true} />
-              <tr>
-                <TableColumn text="Average tokens:" bold={true} />
-                <TableColumn text={avgTokens} />
-              </tr>
-              <tr>
-                <TableColumn text="Max tokens:" bold={true} />
-                <TableColumn
-                  text={version.templates[selectorVal].statistics.maxTokens}
-                />
-              </tr>
-              <tr>
-                <TableColumn text="Average response time:" bold={true} />
-                <TableColumn
-                  text={`${
-                    avgMinutes > 0 ? avgMinutes + " minutes and " : ""
-                  }${avgSeconds} seconds`}
-                />
-              </tr>
-              <tr>
-                <TableColumn text="Max response time:" bold={true} />
-                <TableColumn
-                  text={`${
-                    maxMinutes > 0 ? maxMinutes + " minutes and " : ""
-                  }${maxSeconds} seconds`}
-                />
-              </tr>
-              <tr>
-                <TableColumn text="Number of sessions:" bold={true} />
-                <TableColumn
-                  text={`${version.templates[selectorVal].statistics.numOfSessions}`}
-                />
-              </tr>
-            </tbody>
-          </ShowClassifiedRow>
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <ShowClassifiedRow>
-            <tbody>
-              <tr>
-                <TreeView
-                  defaultCollapseIcon={<ExpandMoreIcon />}
-                  defaultExpandIcon={<ChevronRightIcon />}
-                  sx={{ marginTop: "0.75rem" }}
-                >
-                  <ShowClassifiedRow className="mb-3">
-                    <tr>
-                      <TableColumn text="Regexs" bold={true} />
-                      {version.templates[selectorVal].regex.map(
-                        (reg, index) => {
-                          return (
-                            <tr key={randomBytes(16).toString("hex")}>
-                              <TableColumn
-                                key={randomBytes(16).toString("hex")}
-                                text={`${index + 1}. ${reg}`}
-                              />
-                            </tr>
-                          );
-                        }
-                      )}
-                    </tr>
-                    <tr>
-                      <TableColumn text="Params" bold={true} />
-                      {version.templates[selectorVal].params.map(
-                        (listparam, index) => {
-                          let paramArray = "[";
-                          listparam.forEach((param) => {
-                            paramArray += param + ", ";
-                          });
-                          paramArray = paramArray.slice(0, -2);
-                          paramArray += "]";
-                          return (
-                            <tr key={randomBytes(16).toString("hex")}>
-                              <TableColumn
-                                key={randomBytes(16).toString("hex")}
-                                text={`${index + 1}. ${
-                                  listparam.length === 0 ? "[]" : paramArray
-                                }`}
-                              />
-                            </tr>
-                          );
-                        }
-                      )}
-                    </tr>
-                  </ShowClassifiedRow>
-                  {sessionPromptSplit()}
-                </TreeView>
-              </tr>
-            </tbody>
-          </ShowClassifiedRow>
-        </TabPanel>
-      </div>
+          <div className="overflow-y-auto tab-height border border-1">
+            <TabPanel value={value} index={0}>
+              <ShowClassifiedRow>
+                <tbody>
+                  <TableColumn text="Statistics" bold={true} />
+                  <tr>
+                    <TableColumn text="Average tokens:" bold={true} />
+                    <TableColumn text={avgTokens} />
+                  </tr>
+                  <tr>
+                    <TableColumn text="Max tokens:" bold={true} />
+                    <TableColumn
+                      text={version.templates[selectorVal].statistics.maxTokens}
+                    />
+                  </tr>
+                  <tr>
+                    <TableColumn text="Average response time:" bold={true} />
+                    <TableColumn
+                      text={`${
+                        avgMinutes > 0 ? avgMinutes + " minutes and " : ""
+                      }${avgSeconds} seconds`}
+                    />
+                  </tr>
+                  <tr>
+                    <TableColumn text="Max response time:" bold={true} />
+                    <TableColumn
+                      text={`${
+                        maxMinutes > 0 ? maxMinutes + " minutes and " : ""
+                      }${maxSeconds} seconds`}
+                    />
+                  </tr>
+                  <tr>
+                    <TableColumn text="Number of sessions:" bold={true} />
+                    <TableColumn
+                      text={`${version.templates[selectorVal].statistics.numOfSessions}`}
+                    />
+                  </tr>
+                </tbody>
+              </ShowClassifiedRow>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <ShowClassifiedRow>
+                <tbody>
+                  <tr>
+                    <TreeView
+                      defaultCollapseIcon={<ExpandMoreIcon />}
+                      defaultExpandIcon={<ChevronRightIcon />}
+                      sx={{ marginTop: "0.75rem" }}
+                    >
+                      <ShowClassifiedRow className="mb-3">
+                        <tr>
+                          <TableColumn text="Regexs" bold={true} />
+                          {version.templates[selectorVal].regex.map(
+                            (reg, index) => {
+                              return (
+                                <tr key={randomBytes(16).toString("hex")}>
+                                  <TableColumn
+                                    key={randomBytes(16).toString("hex")}
+                                    text={`${index + 1}. ${reg}`}
+                                  />
+                                </tr>
+                              );
+                            }
+                          )}
+                        </tr>
+                        <tr>
+                          <TableColumn text="Params" bold={true} />
+                          {version.templates[selectorVal].params.map(
+                            (listparam, index) => {
+                              let paramArray = "[";
+                              listparam.forEach((param) => {
+                                paramArray += param + ", ";
+                              });
+                              paramArray = paramArray.slice(0, -2);
+                              paramArray += "]";
+                              return (
+                                <tr key={randomBytes(16).toString("hex")}>
+                                  <TableColumn
+                                    key={randomBytes(16).toString("hex")}
+                                    text={`${index + 1}. ${
+                                      listparam.length === 0 ? "[]" : paramArray
+                                    }`}
+                                  />
+                                </tr>
+                              );
+                            }
+                          )}
+                        </tr>
+                      </ShowClassifiedRow>
+                      {sessionPromptSplit()}
+                    </TreeView>
+                  </tr>
+                </tbody>
+              </ShowClassifiedRow>
+            </TabPanel>
+          </div>
+        </>
+      )}
     </Box>
   );
 };
