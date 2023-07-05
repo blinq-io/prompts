@@ -40,7 +40,6 @@ const TabPanel = (props) => {
 };
 
 const ClassifiedTabs = ({ data }) => {
-  console.log(data);
   const [value, setValue] = useState(0);
   const [version, setVersion] = useState({
     templates: [
